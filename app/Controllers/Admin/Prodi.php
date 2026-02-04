@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\ProdiModel;
 use App\Models\PtModel;
+use App\Models\LogModel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Prodi extends BaseController
@@ -56,6 +57,10 @@ class Prodi extends BaseController
             'nama_prodi'  => $this->request->getPost('nama_prodi'),
             'id_pt'       => $this->request->getPost('id_pt'),
         ]);
+
+        // LOGGING
+        (new LogModel())->log('create', 'prodi', 'Menambah prodi: ' . $this->request->getPost('nama_prodi'));
+
         return redirect()->to('prodi-list');
     }
 
@@ -79,13 +84,24 @@ class Prodi extends BaseController
             'kode_prodi'  => $this->request->getPost('kode_prodi'),
             'nama_prodi'  => $this->request->getPost('nama_prodi'),
         ]);
+
+        // LOGGING
+        (new LogModel())->log('update', 'prodi', 'Update prodi: ' . $this->request->getPost('nama_prodi'));
+
         return redirect()->to('prodi-list');
     }
 
     public function delete($id)
     {
         $model = new ProdiModel();
+        $dt = $model->find($id); // Get data before delete for log
         $model->delete($id);
+
+        // LOGGING
+        if($dt) {
+            (new LogModel())->log('delete', 'prodi', 'Menghapus prodi: ' . $dt['nama_prodi']);
+        }
+
         return redirect()->to('prodi-list');
     }
 
@@ -124,6 +140,9 @@ class Prodi extends BaseController
                         }
                     }
                 }
+
+                // LOGGING
+                (new LogModel())->log('import', 'prodi', "Import Prodi: $imported sukses, $skipped dilewati.");
 
                 $message = "$imported Prodi berhasil diimpor.";
                 if ($skipped > 0) {

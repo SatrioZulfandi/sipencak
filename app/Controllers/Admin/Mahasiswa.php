@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Models\ProdiModel;
 use App\Models\MahasiswaModel;
+use App\Models\LogModel;
 
 class Mahasiswa extends BaseController
 {
@@ -100,6 +101,10 @@ class Mahasiswa extends BaseController
             'pembaruan_status' => 'Tetap',
             'status_pengajuan' => 'Belum Diajukan',
         ]);
+
+        // LOGGING
+        (new LogModel())->log('create', 'mahasiswa', 'Menambah mahasiswa NIM: ' . $this->request->getPost('nim'));
+
         return redirect()->to('mahasiswa-list');
     }
 
@@ -138,6 +143,9 @@ class Mahasiswa extends BaseController
         if (!$model->update($id, $data)) {
             return redirect()->back()->withInput()->with('error', 'Gagal update: ' . implode(', ', $model->errors()));
         }
+
+        // LOGGING
+        (new LogModel())->log('update', 'mahasiswa', 'Update mahasiswa NIM: ' . $this->request->getPost('nim'));
 
         return redirect()->to('mahasiswa-list')->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
@@ -434,7 +442,14 @@ class Mahasiswa extends BaseController
     public function delete($id)
     {
         $model = new MahasiswaModel();
+        $dt = $model->find($id);
         $model->delete($id);
+
+        // LOGGING
+        if ($dt) {
+            (new LogModel())->log('delete', 'mahasiswa', 'Menghapus mahasiswa: ' . $dt['nama'] . ' (' . $dt['nim'] . ')');
+        }
+
         return redirect()->to('mahasiswa-list')->with('success', 'Data mahasiswa berhasil dihapus.');
     }
 }

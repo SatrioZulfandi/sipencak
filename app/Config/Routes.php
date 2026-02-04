@@ -71,6 +71,7 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->post('prodi-update/(:num)', 'Admin\Prodi::update/$1');
     $routes->post('prodi-import', 'Admin\Prodi::import');
     $routes->get('prodi-download-template', 'Admin\Prodi::downloadTemplate');
+    $routes->get('activity-logs', 'Admin\Log::index'); // Route Log Aktivitas
     $routes->post('ajukan-mahasiswa-sync', 'Admin\Pencairan::sync_mahasiswa');
 
     // Manajemen Mahasiswa
