@@ -13,16 +13,20 @@ class Mahasiswa extends BaseController
     public function index()
     {
         $model = new MahasiswaModel();
-        $idPpt = session()->get('pt');
+        $prodiModel = new ProdiModel();
+        $idPt = session()->get('pt');
 
-        // Ambil input keyword dari pencarian
+        // Ambil input filter
         $keyword = $this->request->getGet('keyword');
+        $filterProdi = $this->request->getGet('filter_prodi');
+        $filterAngkatan = $this->request->getGet('filter_angkatan');
 
+        // Base Query
         $model->select('mahasiswas.*, prodis.nama_prodi')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi', 'left')
-            ->where('mahasiswas.id_pt', $idPpt);
+            ->where('mahasiswas.id_pt', $idPt);
 
-        // Tambahkan logika pencarian jika keyword ada
+        // Filter Logic
         if ($keyword) {
             $model->groupStart()
                 ->like('mahasiswas.nim', $keyword)
@@ -31,11 +35,37 @@ class Mahasiswa extends BaseController
                 ->groupEnd();
         }
 
+        if ($filterProdi) {
+            $model->where('mahasiswas.id_prodi', $filterProdi);
+        }
+
+        if ($filterAngkatan) {
+            $model->where('mahasiswas.angkatan', $filterAngkatan);
+        }
+
+        // Data for Dropdowns
+        $listProdi = $prodiModel->where('id_pt', $idPt)->findAll();
+        // $listAngkatan = $model->findDistinctAngkatanByPt($idPt); // REMOVED: Causing BadMethodCallException
+
+        // Use direct builder for distinct angkatan to avoid model complexity
+        $db = \Config\Database::connect();
+        $queryAngkatan = $db->table('mahasiswas')
+                            ->select('angkatan')
+                            ->distinct()
+                            ->where('id_pt', $idPt)
+                            ->orderBy('angkatan', 'DESC')
+                            ->get()
+                            ->getResultArray();
+
         $data = [
             'data'    => $model->paginate(10, 'default'),
             'pager'   => $model->pager,
             'title'   => 'Manajemen Mahasiswa',
-            'keyword' => $keyword // Kirim balik ke view
+            'keyword' => $keyword,
+            'filter_prodi' => $filterProdi,
+            'filter_angkatan' => $filterAngkatan,
+            'list_prodi' => $listProdi,
+            'list_angkatan' => $queryAngkatan
         ];
 
         return view('admin/mahasiswa_list', $data);

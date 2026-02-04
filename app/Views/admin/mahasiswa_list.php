@@ -402,19 +402,46 @@
         </div>
     <?php endif; ?>
 
-    <div class="row mb-2">
-        <div class="col-12 d-flex justify-content-md-end">
-            <form action="" method="get" class="search-container">
-                <input type="text" name="keyword" class="search-input-elite"
-                    placeholder="Cari NIM, Nama, atau Prodi..."
-                    value="<?= esc($keyword ?? '') ?>">
-                <i class="fas fa-search search-icon"></i>
+    <div class="row mb-3">
+        <div class="col-12">
+            <form action="" method="get" class="d-flex flex-wrap gap-2 justify-content-md-end">
+                <!-- Filter Prodi -->
+                <select name="filter_prodi" class="form-select border-0 shadow-sm" style="width: 200px; border-radius: 12px; font-size: 0.85rem;" onchange="this.form.submit()">
+                    <option value="">Semua Prodi</option>
+                    <?php if (!empty($list_prodi)): ?>
+                        <?php foreach($list_prodi as $lp): ?>
+                            <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
+                                <?= esc($lp['nama_prodi']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
 
-                <?php if (!empty($keyword)): ?>
-                    <a href="<?= base_url('mahasiswa-list') ?>" class="clear-search" title="Bersihkan Pencarian">
-                        <i class="fas fa-times-circle"></i>
-                    </a>
-                <?php endif; ?>
+                <!-- Filter Angkatan -->
+                <select name="filter_angkatan" class="form-select border-0 shadow-sm" style="width: 150px; border-radius: 12px; font-size: 0.85rem;" onchange="this.form.submit()">
+                    <option value="">Semua Angkatan</option>
+                    <?php if (!empty($list_angkatan)): ?>
+                        <?php foreach($list_angkatan as $la): ?>
+                            <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
+                                <?= esc($la['angkatan']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+
+                <!-- Search Input -->
+                <div class="search-container" style="max-width: 300px;">
+                    <input type="text" name="keyword" class="search-input-elite"
+                        placeholder="Cari NIM / Nama..."
+                        value="<?= esc($keyword ?? '') ?>">
+                    <i class="fas fa-search search-icon"></i>
+
+                    <?php if (!empty($keyword)): ?>
+                        <a href="<?= base_url('mahasiswa-list') ?>" class="clear-search" title="Bersihkan Pencarian">
+                            <i class="fas fa-times-circle"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
             </form>
         </div>
     </div>
