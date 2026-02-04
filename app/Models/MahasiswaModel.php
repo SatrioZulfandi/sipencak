@@ -27,6 +27,24 @@ class MahasiswaModel extends Model
 
     protected $useTimestamps = false;
 
+    // Validation
+    protected $validationRules = [
+        'nim' => 'required|is_unique[mahasiswas.nim,id,{id}]',
+        'nama' => 'required',
+        'id_pt' => 'required',
+        'id_prodi' => 'required',
+    ];
+
+    protected $validationMessages = [
+        'nim' => [
+            'is_unique' => 'NIM sudah terdaftar.',
+            'required' => 'NIM wajib diisi.'
+        ],
+        'nama' => [
+            'required' => 'Nama mahasiswa wajib diisi.'
+        ]
+    ];
+
     /**
      * Mengambil semua data mahasiswa dengan detail prodi
      */

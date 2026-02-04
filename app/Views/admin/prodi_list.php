@@ -448,7 +448,7 @@
 
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
-                    <a href="<?= base_url('assets/template/templateprodi.xlsx') ?>" class="text-decoration-none small fw-bold text-primary">
+                    <a href="<?= base_url('prodi-download-template') ?>" class="text-decoration-none small fw-bold text-primary">
                         <i class="fas fa-cloud-download-alt me-1"></i> Unduh Template Excel (.xlsx)
                     </a>
                 </div>
@@ -472,8 +472,9 @@
                 <div class="alert bg-light border-0 d-flex gap-3 p-3">
                     <i class="fas fa-info-circle text-primary fs-5"></i>
                     <div class="small">
+                        Kode PT Anda: <span class="badge bg-primary"><?= $kode_pt ?></span><br>
                         Kolom wajib di Excel: <br>
-                        <code class="text-primary fw-bold">id_pt, kode_prodi, nama_prodi</code>
+                        <code class="text-primary fw-bold">kode_pt, kode_prodi, nama_prodi</code>
                     </div>
                 </div>
             </div>

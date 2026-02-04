@@ -70,6 +70,7 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->post('prodi-store', 'Admin\Prodi::store');
     $routes->post('prodi-update/(:num)', 'Admin\Prodi::update/$1');
     $routes->post('prodi-import', 'Admin\Prodi::import');
+    $routes->get('prodi-download-template', 'Admin\Prodi::downloadTemplate');
     $routes->post('ajukan-mahasiswa-sync', 'Admin\Pencairan::sync_mahasiswa');
 
     // Manajemen Mahasiswa
@@ -82,6 +83,8 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->post('mahasiswa-update/(:num)', 'Admin\Mahasiswa::update/$1');
     $routes->post('mahasiswa/updateStatus', 'Admin\Mahasiswa::updateStatus');
     $routes->post('mahasiswa-import', 'Admin\Mahasiswa::import');
+    $routes->get('mahasiswa-download-error/(:segment)', 'Admin\Mahasiswa::downloadErrorFile/$1');
+    $routes->get('mahasiswa-download-template', 'Admin\Mahasiswa::downloadTemplate');
 
     // 1
     $routes->get('verifikasi-pembaharuan-status', 'Admin\Pencairan::index');

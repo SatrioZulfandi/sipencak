@@ -24,11 +24,14 @@ class Prodi extends BaseController
                 ->groupEnd();
         }
 
+        $pt = (new PtModel())->find($id_pt);
+
         $data = [
             'data'    => $model->where('id_pt', $id_pt)->paginate(10, 'default'),
             'pager'   => $model->pager,
             'title'   => 'Manajemen Prodi',
-            'keyword' => $keyword // Kirim balik ke view untuk mengisi value input
+            'keyword' => $keyword,
+            'kode_pt' => $pt['kode_pt'] ?? '-' // Pass kode_pt
         ];
 
         return view('admin/prodi_list', $data);
@@ -134,5 +137,76 @@ class Prodi extends BaseController
         }
 
         return redirect()->to('prodi-list')->with('error', 'File tidak valid atau gagal diunggah.');
+    }
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template Prodi');
+
+        // Headers
+        $headers = ['Kode PT', 'Kode Prodi', 'Nama Prodi', 'Jenjang', 'Akreditasi'];
+        $sheet->fromArray($headers, NULL, 'A1');
+
+        // Styling Header (Blue & White)
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => 'FFFFFFFF'], 
+                'size' => 12,
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FF4F81BD'], 
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FFFFFFFF'], 
+                ],
+            ],
+        ];
+        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // Add Input Hints (Comments)
+        $sheet->getComment('A1')->getText()->createTextRun('Wajib: Kode Perguruan Tinggi (sesuai PDDIKTI).');
+        $sheet->getComment('B1')->getText()->createTextRun('Wajib: Kode Prodi (unik).');
+        
+        // Auto Width
+        foreach(range('A','E') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Example Data (Standard Black)
+        $sheet->setCellValue('A2', '031041');
+        $sheet->setCellValue('B2', '55201');
+        $sheet->setCellValue('C2', 'Informatika');
+        $sheet->setCellValue('D2', 'S1');
+        $sheet->setCellValue('E2', 'B');
+
+        // Style Example Data (Standard)
+        $sheet->getStyle('A2:E2')->applyFromArray([
+            'font' => ['color' => ['argb' => 'FF000000']],
+        ]);
+
+        // FORCE TEXT FORMAT FOR KODE PT (A) AND KODE PRODI (B)
+        $sheet->getStyle('A:B')
+            ->getNumberFormat()
+            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'Template_Import_Prodi.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="'. $fileName .'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 }

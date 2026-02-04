@@ -358,6 +358,50 @@
             </a>
         </div>
     </div>
+
+    <?php if (session()->getFlashdata('error_filename')): ?>
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm border-0" role="alert" style="border-radius: 12px; border-left: 5px solid #ffc107 !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-3 fs-3 text-warning"></i>
+                    <div>
+                        <h6 class="alert-heading fw-bold mb-1">Perhatian: Beberapa Data Gagal Diimpor</h6>
+                        <p class="mb-0 small text-muted">Silakan unduh file Excel laporan di bawah ini untuk melihat detail kesalahan dan memperbaikinya.</p>
+                    </div>
+                </div>
+                <div>
+                     <a href="<?= base_url('mahasiswa-download-error/' . session()->getFlashdata('error_filename')) ?>" 
+                        class="btn-elite btn-warning text-white btn-sm text-decoration-none">
+                        <i class="fas fa-file-download me-2"></i> Download Data Gagal
+                    </a>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert" style="border-radius: 12px; border-left: 5px solid #dc3545 !important;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-times-circle me-2 fs-5"></i>
+                <div><?= session()->getFlashdata('error') ?></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('warning')): ?>
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm border-0" role="alert" style="border-radius: 12px; border-left: 5px solid #ffc107 !important;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+                <div><?= session()->getFlashdata('warning') ?></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row mb-2">
         <div class="col-12 d-flex justify-content-md-end">
             <form action="" method="get" class="search-container">
@@ -425,14 +469,14 @@
                                             </div>
                                         </a>
 
-                                        <a href="<?= base_url('mahasiswa-delete/' . $row['id']) ?>"
-                                            class="btn-elite-action text-danger"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus data mahasiswa ini?')"
+                                        <button type="button" 
+                                            class="btn-elite-action text-danger border-0 bg-transparent"
+                                            onclick="confirmDelete('<?= base_url('mahasiswa-delete/' . $row['id']) ?>', '<?= esc($row['nama']) ?>')"
                                             title="Hapus">
                                             <div class="action-wrapper">
                                                 <i class="fas fa-trash"></i>
                                             </div>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -474,7 +518,7 @@
 
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
-                    <a href="<?= base_url('assets/template/mahasiswa.xlsx') ?>" class="text-decoration-none small fw-bold text-primary">
+                    <a href="<?= base_url('mahasiswa-download-template') ?>" class="text-decoration-none small fw-bold text-primary">
                         <i class="fas fa-cloud-download-alt me-1"></i> Unduh Template Mahasiswa (.xlsx)
                     </a>
                 </div>
@@ -512,7 +556,39 @@
     </div>
 </div>
 
+<!-- Modal Hapus -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content modal-content-elite text-center p-4">
+            <div class="mb-3">
+                <div class="mx-auto d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle" style="width: 60px; height: 60px;">
+                    <i class="fas fa-trash-alt text-danger fa-lg"></i>
+                </div>
+            </div>
+            <h5 class="fw-bold mb-2">Hapus Mahasiswa?</h5>
+            <p class="text-muted small mb-4">Apakah Anda yakin ingin menghapus data <strong id="deleteName"></strong>? Data yang dihapus tidak dapat dikembalikan.</p>
+            
+            <div class="d-flex gap-2 justify-content-center">
+                <button type="button" class="btn-elite btn-outline-elite w-50" data-bs-dismiss="modal">Batal</button>
+                <a href="#" id="btnConfirmDelete" class="btn-elite btn-primary-elite w-50 bg-danger border-danger">Hapus</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    function confirmDelete(url, name) {
+        document.getElementById('deleteName').textContent = name;
+        document.getElementById('btnConfirmDelete').setAttribute('href', url);
+        
+        const modalId = '#deleteModal';
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const myModal = new bootstrap.Modal(document.querySelector(modalId));
+            myModal.show();
+        } else if (window.jQuery && typeof jQuery.fn.modal !== 'undefined') {
+            $(modalId).modal('show');
+        }
+    }
     function openUploadModal() {
         const modalId = '#uploadModal';
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
