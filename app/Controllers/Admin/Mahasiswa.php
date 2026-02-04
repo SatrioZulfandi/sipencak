@@ -91,7 +91,9 @@ class Mahasiswa extends BaseController
     public function update($id)
     {
         $model = new MahasiswaModel();
-        $model->update($id, [
+        
+        $data = [
+            'id' => $id, // Penting untuk validasi is_unique NIM (exclude self)
             'id_pt' => $this->request->getPost('id_pt'),
             'id_prodi' => $this->request->getPost('id_prodi'),
             'nim' => $this->request->getPost('nim'),
@@ -101,8 +103,13 @@ class Mahasiswa extends BaseController
             'kategori' => $this->request->getPost('kategori'),
             'pembaruan_status' => 'Tetap',
             'status_pengajuan' => 'Belum Diajukan',
-        ]);
-        return redirect()->to('mahasiswa-list');
+        ];
+
+        if (!$model->update($id, $data)) {
+            return redirect()->back()->withInput()->with('error', 'Gagal update: ' . implode(', ', $model->errors()));
+        }
+
+        return redirect()->to('mahasiswa-list')->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
 
     public function show($id)

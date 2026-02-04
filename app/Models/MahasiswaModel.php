@@ -29,6 +29,7 @@ class MahasiswaModel extends Model
 
     // Validation
     protected $validationRules = [
+        'id' => 'permit_empty', // Required for placeholder {id} to work
         'nim' => 'required|is_unique[mahasiswas.nim,id,{id}]',
         'nama' => 'required',
         'id_pt' => 'required',

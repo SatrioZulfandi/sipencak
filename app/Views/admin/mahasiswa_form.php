@@ -208,8 +208,16 @@
                     <div class="col-md-6">
                         <div class="field-group">
                             <label class="field-label">Jenjang Pendidikan</label>
-                            <input type="text" class="input-premium" name="jenjang" placeholder="S1 / D3" required
-                                value="<?= $btn == 'edit' ? esc($data['jenjang']) : '' ?>">
+                            <select name="jenjang" class="input-premium" required>
+                                <option value="" disabled selected>Pilih Jenjang</option>
+                                <?php
+                                $jenjangOptions = ['D3', 'D4', 'S1', 'S2', 'S3', 'Profesi'];
+                                foreach ($jenjangOptions as $j) {
+                                    $selected = ($btn == 'edit' && $data['jenjang'] == $j) ? 'selected' : '';
+                                    echo "<option value=\"$j\" $selected>$j</option>";
+                                }
+                                ?>
+                            </select>
                         </div>
                     </div>
 
