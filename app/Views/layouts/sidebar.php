@@ -59,6 +59,13 @@
                     <span class="sidebar-text">Laporan</span>
                 </a>
             </div>
+            
+            <div class="nav-item <?= $uri === 'activity-logs' ? 'active' : '' ?>">
+                <a href="<?= base_url('operator/activity-logs') ?>" class="sidebar-link" data-title="Log Aktivitas">
+                    <i class="fas fa-history"></i>
+                    <span class="sidebar-text">Log Aktivitas</span>
+                </a>
+            </div>
 
         <?php elseif ($role === 'admin') : ?>
             <div class="nav-label">Dashboard</div>

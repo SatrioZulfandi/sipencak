@@ -24,11 +24,18 @@ class Log extends BaseController
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
         $model = new LogModel();
-        
+
+        // FILTER: Hanya tampilkan log milik user yang sedang login
+        $userId = session()->get('id');
+        $role   = session()->get('role');
+
         $data = [
-            'data'    => $model->orderBy('created_at', 'DESC')->paginate(20, 'default'),
+            'data'    => $model->where('user_id', $userId)
+                               ->where('role', $role)
+                               ->orderBy('created_at', 'DESC')
+                               ->paginate(20, 'default'),
             'pager'   => $model->pager,
-            'title'   => 'Log Aktivitas Admin'
+            'title'   => 'Log Aktivitas Saya'
         ];
 
         return view('admin/log_list', $data);

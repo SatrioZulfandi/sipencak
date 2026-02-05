@@ -54,6 +54,11 @@ class Home extends BaseController
         ];
 
         $model->update($id, $data);
+        
+        
+        // LOGGING
+        // use App\Models\LogModel; // Removed invalid placement
+        (new \App\Models\LogModel())->log('update', 'user', 'Mengubah password admin ID: ' . $id);
 
         return redirect()->to(base_url('home'))->with('success', 'Password berhasil diperbarui.');
     }

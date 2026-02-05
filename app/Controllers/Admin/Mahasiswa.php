@@ -330,6 +330,9 @@ class Mahasiswa extends BaseController
                     session()->setFlashdata('error_filename', $fileName);
                 }
 
+                // LOGGING
+                (new LogModel())->log('import', 'mahasiswa', "Import Mahasiswa: $successCount sukses, $failureCount gagal.");
+
                 $type = $failureCount > 0 ? 'warning' : 'success';
                 return redirect()->to('mahasiswa-list')->with($type, $message);
 
@@ -434,6 +437,12 @@ class Mahasiswa extends BaseController
             $updated = $model->update($data->id, [
                 'pembaruan_status' => $data->pembaruan_status,
             ]);
+
+            // LOGGING
+            if($updated) {
+                (new LogModel())->log('update', 'mahasiswa', 'Update status mahasiswa ID ' . $data->id . ' menjadi ' . $data->pembaruan_status);
+            }
+
             return $this->response->setJSON(['success' => $updated]);
         }
         return $this->response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);

@@ -57,6 +57,7 @@ $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
     $routes->get('laporan', 'Operator\Pencairan::laporanHome');
     $routes->get('laporan-list/(:num)', 'Operator\Pencairan::laporanByPt/$1');
     $routes->get('Operator/pencairan/unduh-laporan', 'Operator\Pencairan::unduhLaporan');
+    $routes->get('operator/activity-logs', 'Admin\Log::index'); // Unique URL for Operator
 });
 
 

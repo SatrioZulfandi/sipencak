@@ -507,6 +507,9 @@ class Pencairan extends BaseController
                 'alasan_tolak' => 'Dibatalkan oleh Operator'
             ]);
 
+            // LOGGING
+            (new \App\Models\LogModel())->log('cancel', 'pencairan', 'Operator membatalkan pengajuan ID: ' . $id);
+
             return redirect()->to('pencairan-list')->with('success', 'Pengajuan berhasil dibatalkan. Status diubah menjadi Ditolak.');
         }
 

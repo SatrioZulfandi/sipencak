@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\MahasiswaModel;
 use App\Models\PencairanModel;
 use App\Models\PeriodeModel;
+use App\Models\LogModel; // Import LogModel
 use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -489,6 +490,9 @@ class Pencairan extends BaseController
             'berita_acara' => $newBerita_acara,
         ]);
 
+        // LOGGING
+        (new LogModel())->log('update', 'pencairan', 'Memperbarui data verifikasi pengajuan ID: ' . $id);
+
         return redirect()->to('verifikasi-pembaharuan-status');
     }
 
@@ -669,6 +673,9 @@ class Pencairan extends BaseController
             'jumlah_mahasiswa' => $jumlah
         ]);
 
+        // LOGGING
+        (new LogModel())->log('approve', 'pencairan', 'Menyelesaikan verifikasi pengajuan ID: ' . $id . '. Jumlah Mahasiswa: ' . $jumlah);
+
         $db->transComplete();
 
         return redirect()->to('verifikasi-pembaharuan-status')->with('success', 'Berhasil diajukan ke pusat.');
@@ -707,6 +714,9 @@ class Pencairan extends BaseController
 
             // 4. HAPUS DATA PENCAIRAN DARI DATABASE
             $model->delete($id);
+
+            // LOGGING
+            (new LogModel())->log('delete', 'pencairan', 'Membatalkan/Menghapus pengajuan ID: ' . $id . ' dari ' . ($data['id_pt'] ?? 'unknown'));
 
             $db->transComplete();
 
@@ -819,6 +829,9 @@ class Pencairan extends BaseController
                 'status'       => 'Ditolak',
                 'alasan_tolak' => $alasan
             ]);
+            
+            // LOGGING
+            (new LogModel())->log('reject', 'pencairan', 'Menolak pengajuan ID: ' . $id . '. Alasan: ' . $alasan);
 
             $db->transComplete();
 
