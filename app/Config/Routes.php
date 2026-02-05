@@ -50,6 +50,8 @@ $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
     $routes->get('operator/pencairan/unduh-mahasiswa/(:num)', 'Operator\Pencairan::unduhMahasiswa/$1');
     $routes->post('pencairan/selesai/(:num)', 'Operator\Pencairan::markSelesai/$1');
     $routes->post('pencairan/ditolak/(:num)', 'Operator\Pencairan::markDitolak/$1');
+    $routes->post('pencairan/revisi/(:num)', 'Operator\Pencairan::revisi/$1'); // Edit (Kembali ke Draft)
+    $routes->post('pencairan/batalkan/(:num)', 'Operator\Pencairan::batalkan/$1'); // Batalkan (Hapus)
     $routes->get('laporan-list', 'Operator\Pencairan::laporan');
     $routes->get('laporan-detail/(:num)', 'Operator\Pencairan::detail/$1');
     $routes->get('laporan', 'Operator\Pencairan::laporanHome');
@@ -94,6 +96,7 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->get('verifikasi-edit/(:num)', 'Admin\Pencairan::edit/$1');
     $routes->get('verifikasi-detail/(:num)', 'Admin\Pencairan::detail/$1');
     $routes->get('export-mahasiswa/(:num)', 'Admin\Pencairan::export_mahasiswa/$1');
+    $routes->post('verifikasi-ditolak/(:num)', 'Admin\Pencairan::ditolak/$1');
     $routes->post('verifikasi-update/(:num)', 'Admin\Pencairan::update/$1');
     $routes->post('permohonan-store', 'Admin\Pencairan::store');
     $routes->get('admin/pencairan/unduh-excel', 'Admin\Pencairan::unduhExcel');

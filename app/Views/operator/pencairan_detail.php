@@ -291,8 +291,26 @@
                         <i class="fas fa-times-circle"></i> DITOLAK
                     </div>
                 <?php else: ?>
-                    <div class="status-badge-modern status-proses">
-                        <i class="fas fa-spinner fa-spin"></i> <?= strtoupper(esc($data['status'] ?? 'PROSES')) ?>
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <div class="status-badge-modern status-proses">
+                            <i class="fas fa-spinner fa-spin"></i> <?= strtoupper(esc($data['status'] ?? 'PROSES')) ?>
+                        </div>
+                        <?php if ($data['status'] === 'Diproses'): ?>
+                            <div class="d-flex gap-2">
+                                <form action="<?= base_url('pencairan/revisi/' . $data['id']) ?>" method="post" onsubmit="return confirm('Edit kembali pengajuan ini? Status akan berubah menjadi Draft.')">
+                                    <?= csrf_field() ?>
+                                    <button class="btn-action btn-warning-custom shadow-sm" style="height: 32px; padding: 0 1rem; font-size: 0.75rem;">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </button>
+                                </form>
+                                <form action="<?= base_url('pencairan/batalkan/' . $data['id']) ?>" method="post" onsubmit="return confirm('Yakin ingin membatalkan? Data pengajuan akan dihapus.')">
+                                    <?= csrf_field() ?>
+                                    <button class="btn-action btn-table-reject shadow-sm" style="height: 32px; padding: 0 1rem; font-size: 0.75rem;">
+                                        <i class="fas fa-trash me-1"></i> Batalkan
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 <?php endif ?>
             </div>

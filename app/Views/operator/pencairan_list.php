@@ -338,9 +338,9 @@
                                 <td class="fw-700"><?= esc($item['jumlah_mahasiswa']) ?></td>
                                 <td>
                                     <?php if ($item['status'] === 'Selesai'): ?>
-                                        <span class="badge-status bg-primary-soft" data-bs-toggle="modal" data-bs-target="#modalSelesai<?= $item['id'] ?>" style="cursor: pointer;">Selesai</span>
+                                        <span class="badge-status bg-primary-soft" data-toggle="modal" data-target="#modalSelesai<?= $item['id'] ?>" style="cursor: pointer;">Selesai</span>
                                     <?php elseif ($item['status'] === 'Ditolak'): ?>
-                                        <span class="badge-status bg-danger-soft" data-bs-toggle="modal" data-bs-target="#modalAlasan<?= $item['id'] ?>" style="cursor: pointer;">Ditolak</span>
+                                        <span class="badge-status bg-danger-soft" data-toggle="modal" data-target="#modalAlasan<?= $item['id'] ?>" style="cursor: pointer;">Ditolak</span>
                                     <?php else: ?>
                                         <span class="badge-status bg-info-soft"><?= esc($item['status']) ?></span>
                                     <?php endif; ?>
@@ -352,7 +352,7 @@
                                             <form action="<?= base_url('pencairan/selesai/' . $item['id']) ?>" method="post" onsubmit="return confirm('Selesaikan pengajuan?')">
                                                 <?= csrf_field() ?><button type="submit" class="btn-table-action btn-table-check"><i class="fas fa-check"></i></button>
                                             </form>
-                                            <button type="button" class="btn-table-action btn-table-reject" data-bs-toggle="modal" data-bs-target="#modalTolak<?= $item['id'] ?>"><i class="fas fa-times"></i></button>
+                                            <button type="button" class="btn-table-action btn-table-reject" data-toggle="modal" data-target="#modalBatalkan<?= $item['id'] ?>" title="Batalkan Pengajuan"><i class="fas fa-times"></i></button>
                                         <?php endif ?>
                                     </div>
                                 </td>
@@ -384,7 +384,7 @@
             <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
                 <div class="modal-header border-0 p-4">
                     <h5 class="fw-800 mb-0"><i class="fas fa-exclamation-circle text-warning me-2"></i> Alasan Penolakan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body p-4 pt-0">
                     <div class="bg-light p-3 rounded-3 border small"><?= nl2br(esc($item['alasan_tolak'])) ?></div>
@@ -398,7 +398,7 @@
             <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
                 <div class="modal-header border-0 p-4">
                     <h5 class="fw-800 mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Pengajuan Selesai</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body p-4 text-center">
                     <p class="text-muted small">Verifikasi diajukan. Silakan cek portal monitoring:</p>
@@ -408,18 +408,21 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalTolak<?= $item['id'] ?>" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalBatalkan<?= $item['id'] ?>" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
-                <form action="<?= base_url('pencairan/ditolak/' . $item['id']) ?>" method="post">
+                <form action="<?= base_url('pencairan/batalkan/' . $item['id']) ?>" method="post">
                     <?= csrf_field() ?>
                     <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="fw-800 mb-0">Input Alasan Tolak</h5>
+                        <h5 class="fw-800 mb-0 text-danger"><i class="fas fa-times-circle me-2"></i> Konfirmasi Pembatalan</h5>
                     </div>
-                    <div class="modal-body p-4"><textarea name="alasan" class="form-control-modern" style="height: 120px; padding: 10px;" required placeholder="Berikan alasan yang jelas..."></textarea></div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" class="btn-action bg-light text-muted" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-action bg-danger text-white">Tolak Pengajuan</button>
+                    <div class="modal-body p-4 text-center">
+                        <p class="mb-3 text-dark fw-bold">Apakah Anda yakin ingin membatalkan pengajuan ini?</p>
+                        <p class="small text-muted mb-0">Status akan berubah menjadi <b>Dibatalkan</b>. Data Anda tidak akan dihapus dan mahasiswa dapat diajukan kembali.</p>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+                        <button type="button" class="btn-action bg-light text-muted" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn-action bg-danger text-white">Ya, Batalkan Pengajuan</button>
                     </div>
                 </form>
             </div>

@@ -427,9 +427,10 @@ class Pencairan extends BaseController
 
     public function ditolak($id)
     {
+        $model = new \App\Models\PencairanModel();
         $alasan = $this->request->getPost('alasan');
 
-        $this->pencairanModel->update($id, [
+        $model->update($id, [
             'status' => 'Ditolak',
             'alasan_tolak' => $alasan
         ]);
@@ -474,5 +475,41 @@ class Pencairan extends BaseController
         }
 
         return redirect()->back()->with('warning', 'Status tidak dapat diubah.');
+    }
+    public function revisi($id)
+    {
+        $model = new \App\Models\PencairanModel();
+        $data = $model->find($id);
+
+        if ($data && $data['status'] === 'Diproses') {
+            $model->update($id, ['status' => 'Draft']);
+            return redirect()->to('pencairan-list')->with('success', 'Pengajuan dikembalikan ke Draft. Silakan edit.');
+        }
+
+        return redirect()->back()->with('error', 'Tidak dapat mengedit pengajuan ini.');
+    }
+
+    public function batalkan($id)
+    {
+        $model = new \App\Models\PencairanModel();
+        $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $data = $model->find($id);
+
+        if ($data && $data['status'] === 'Diproses') {
+            // Lepaskan mahasiswa
+            $mahasiswaModel->where('id_pencairan', $id)
+                ->set(['id_pencairan' => null, 'status_pengajuan' => 'Belum Diajukan'])
+                ->update();
+            
+            // Update status ke Ditolak (sesuai request user: Dibatalkan = Ditolak)
+            $model->update($id, [
+                'status' => 'Ditolak',
+                'alasan_tolak' => 'Dibatalkan oleh Operator'
+            ]);
+
+            return redirect()->to('pencairan-list')->with('success', 'Pengajuan berhasil dibatalkan. Status diubah menjadi Ditolak.');
+        }
+
+        return redirect()->back()->with('error', 'Tidak dapat membatalkan pengajuan ini.');
     }
 }

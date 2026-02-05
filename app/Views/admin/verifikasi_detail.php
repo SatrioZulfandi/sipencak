@@ -219,10 +219,23 @@
 
 <div class="container-fluid px-4 py-4 fade-in-up">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="javascript:history.back()" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold shadow-sm">
-            <i class="fas fa-arrow-left me-2"></i> Kembali
-        </a>
-        <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.02em;">Detail Permohonan</h4>
+        <div class="d-flex align-items-center">
+            <a href="javascript:history.back()" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold shadow-sm mr-3">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali
+            </a>
+            <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.02em;">Detail Permohonan</h4>
+        </div>
+
+        <?php if ($data['status'] === 'Diproses'): ?>
+            <div class="d-flex">
+                <a href="<?= base_url('verifikasi-edit/' . $data['id']) ?>" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center mr-2">
+                    <i class="fas fa-pen mr-2"></i> Edit
+                </a>
+                <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTolakAdmin">
+                    <i class="fas fa-times-circle mr-2"></i> Tolak
+                </button>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="info-card-elite">
@@ -411,6 +424,36 @@
                 <div class="modal-footer border-0 pb-4 justify-content-center">
                     <button type="button" class="btn btn-dark rounded-pill px-5 fw-bold btn-sm shadow-sm" data-bs-dismiss="modal">Tutup</button>
                 </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if ($data['status'] === 'Diproses'): ?>
+    <div class="modal fade" id="modalTolakAdmin" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+                <form action="<?= base_url('verifikasi-ditolak/' . $data['id']) ?>" method="post">
+                    <?= csrf_field() ?>
+                    <div class="modal-header bg-danger text-white border-0 py-3 px-4">
+                        <h6 class="modal-title fw-bold"><i class="fas fa-times-circle me-2"></i> Tolak Pengajuan</h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Alasan Penolakan</label>
+                            <textarea name="alasan" class="form-control" rows="4" required placeholder="Jelaskan alasan penolakan..."></textarea>
+                        </div>
+                        <div class="alert alert-warning small mb-0">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Tindakan ini akan mengubah status menjadi <b>Ditolak</b> dan melepaskan semua mahasiswa agar bisa diajukan kembali.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pb-4 justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-5 fw-bold btn-sm shadow-sm">Tolak Pengajuan</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

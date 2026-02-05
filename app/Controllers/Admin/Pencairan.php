@@ -786,4 +786,49 @@ class Pencairan extends BaseController
 
         return view('Admin/verifikasi_detail', $dataView);
     }
+    public function ditolak($id)
+    {
+        $id = (int)$id; // Ensure ID is integer
+        $model = new PencairanModel();
+        $mahasiswaModel = new MahasiswaModel();
+        $db = \Config\Database::connect();
+
+        $data = $model->find($id);
+
+        if (!$data) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+
+        // Tangkap alasan dari form
+        $alasan = $this->request->getPost('alasan');
+
+        if ($data['status'] === 'Diproses') {
+            $db->transStart();
+
+            // 1. Update mahasiswa yang terkait: reset status dan hapus id_pencairan
+            // Sehingga bisa diajukan kembali di periode berikutnya
+            $mahasiswaModel->where('id_pencairan', $id)
+                ->set([
+                    'status_pengajuan' => 'Belum Diajukan',
+                    'id_pencairan'     => null,
+                ])
+                ->update();
+
+            // 2. Update status pencairan dan simpan alasan
+            $model->update($id, [
+                'status'       => 'Ditolak',
+                'alasan_tolak' => $alasan
+            ]);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return redirect()->back()->with('error', 'Gagal memproses penolakan.');
+            }
+
+            return redirect()->back()->with('success', 'Status berhasil diubah menjadi Ditolak. Mahasiswa dikembalikan ke status Belum Diajukan.');
+        }
+
+        return redirect()->back()->with('warning', 'Status tidak dapat diubah.');
+    }
 }

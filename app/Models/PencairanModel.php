@@ -74,7 +74,7 @@ class PencairanModel extends Model
     {
         return $this->select('pencairans.*, pts.perguruan_tinggi, pts.kode_pt')
             ->join('pts', 'pts.id = pencairans.id_pt')
-            ->whereIn('status', ['Diproses', 'Selesai', 'Ditolak']) // ✅ tambahkan Ditolak
+            ->whereIn('status', ['Diproses', 'Selesai', 'Ditolak', 'Dibatalkan']) // ✅ tambahkan Ditolak & Dibatalkan
             ->findAll();
     }
 
@@ -83,7 +83,7 @@ class PencairanModel extends Model
     {
         $builder = $this->select('pencairans.*, pts.perguruan_tinggi, pts.kode_pt')
             ->join('pts', 'pts.id = pencairans.id_pt')
-            ->whereIn('pencairans.status', ['Diproses', 'Selesai', 'Ditolak']);
+            ->whereIn('pencairans.status', ['Diproses', 'Selesai', 'Ditolak', 'Dibatalkan']);
 
         if ($tahun) {
             $builder->where('YEAR(pencairans.tanggal_entry)', $tahun);
