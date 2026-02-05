@@ -16,11 +16,10 @@
                     <thead class="bg-primary text-white">
                         <tr>
                             <th>Waktu</th>
-                            <th>User</th>
                             <th>Aksi</th>
                             <th>Menu</th>
                             <th>Deskripsi</th>
-                            <th>IP Address</th>
+                            <th>Perangkat</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,10 +27,6 @@
                             <?php foreach ($data as $row): ?>
                                 <tr>
                                     <td style="white-space: nowrap;"><?= date('d M Y H:i', strtotime($row['created_at'])) ?></td>
-                                    <td>
-                                        <div class="fw-bold"><?= esc($row['username']) ?></div>
-                                        <small class="text-muted"><?= esc($row['role']) ?></small>
-                                    </td>
                                     <td>
                                         <?php
                                             $badge = 'secondary';
@@ -44,12 +39,16 @@
                                     </td>
                                     <td><?= ucfirst($row['menu']) ?></td>
                                     <td><?= esc($row['description']) ?></td>
-                                    <td><small class="font-monospace"><?= esc($row['ip_address']) ?></small></td>
+                                    <td>
+                                        <small class="text-muted" title="<?= esc($row['user_agent'] ?? '-') ?>">
+                                            <?= esc(substr($row['user_agent'] ?? '-', 0, 50)) . (strlen($row['user_agent'] ?? '-') > 50 ? '...' : '') ?>
+                                        </small>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="text-center">Belum ada aktivitas.</td>
+                                <td colspan="5" class="text-center">Belum ada aktivitas.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
