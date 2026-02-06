@@ -25,6 +25,17 @@ $routes->get('refresh-captcha', 'Auth::refreshCaptcha');
 $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
     $routes->get('dashboard', 'Operator\Dashboard::index');
     $routes->post('password-update/(:num)', 'Operator\Dashboard::update/$1');
+    
+    // Change Password with OTP (Operator)
+    $routes->post('operator/send-change-otp', 'Operator\Dashboard::sendChangeOtp');
+    $routes->post('operator/verify-change-otp', 'Operator\Dashboard::verifyChangeOtp');
+    $routes->post('operator/update-password-otp', 'Operator\Dashboard::updatePasswordOtp');
+    
+    // Update Email (Operator)
+    $routes->post('operator/update-email', 'Operator\Dashboard::updateEmail');
+    
+    // Update Profile (Operator)
+    $routes->post('operator/update-profile', 'Operator\Dashboard::updateProfile');
 
     // Manajemen Perguruan Tinggi
     $routes->get('pt-list', 'Operator\Pt::index');
@@ -75,6 +86,11 @@ $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
 $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->get('home', 'Admin\Home::index');
     $routes->post('password-updates/(:num)', 'Admin\Home::update/$1');
+    
+    // Change Password with OTP (Admin)
+    $routes->post('send-change-otp', 'Admin\Home::sendChangeOtp');
+    $routes->post('verify-change-otp', 'Admin\Home::verifyChangeOtp');
+    $routes->post('update-password-otp', 'Admin\Home::updatePasswordOtp');
 
     // Manajemen Prodi
     $routes->get('prodi-list', 'Admin\Prodi::index');
