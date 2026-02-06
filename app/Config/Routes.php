@@ -10,6 +10,14 @@ $routes->get('login', 'Auth::index');
 $routes->get('logout', 'Auth::logout');
 $routes->post('login', 'Auth::login');
 
+// Forgot Password Routes
+$routes->get('forgot', 'Auth::forgot');
+$routes->post('send-reset', 'Auth::sendReset');
+$routes->get('verify', 'Auth::verify');
+$routes->post('check-code', 'Auth::checkCode');
+$routes->get('new-password', 'Auth::newPassword');
+$routes->post('update-password', 'Auth::updatePassword');
+
 // Protected page (hanya bisa diakses setelah login)
 $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
     $routes->get('dashboard', 'Operator\Dashboard::index');

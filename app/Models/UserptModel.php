@@ -12,7 +12,7 @@ class UserptModel extends Model
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $protectFields = true;
-    protected $allowedFields = ['id_pt', 'username', 'password', 'penanggung_jawab', 'nip', 'kontak', 'email', 'status'];
+    protected $allowedFields = ['id_pt', 'username', 'password', 'penanggung_jawab', 'nip', 'kontak', 'email', 'status', 'reset_code', 'reset_expired'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
