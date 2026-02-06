@@ -18,6 +18,9 @@ $routes->post('check-code', 'Auth::checkCode');
 $routes->get('new-password', 'Auth::newPassword');
 $routes->post('update-password', 'Auth::updatePassword');
 
+// Captcha Route
+$routes->get('refresh-captcha', 'Auth::refreshCaptcha');
+
 // Protected page (hanya bisa diakses setelah login)
 $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
     $routes->get('dashboard', 'Operator\Dashboard::index');

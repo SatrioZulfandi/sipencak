@@ -164,6 +164,7 @@
             padding: 40px;
             position: relative;
             z-index: 10;
+            overflow-y: auto;
         }
 
         .login-box {
@@ -197,12 +198,12 @@
         }
 
         .header-section {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .header-section img {
             height: 48px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .header-section h1 {
@@ -213,7 +214,7 @@
         }
 
         .form-group-modern {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group-modern label {
@@ -274,9 +275,64 @@
             transform: translateY(-2px);
         }
 
+        /* Captcha Styles */
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .captcha-image {
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .captcha-refresh {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 10px;
+            color: var(--primary);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .captcha-refresh:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .captcha-refresh.loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .captcha-refresh.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .captcha-input {
+            padding: 14px 18px !important;
+            padding-left: 18px !important;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 700;
+            text-align: center;
+        }
+
         footer {
-            margin-top: 50px;
-            padding-top: 30px;
+            margin-top: 30px;
+            padding-top: 20px;
             border-top: 1px solid #f1f5f9;
         }
     </style>
@@ -324,7 +380,7 @@
                     </div>
                 <?php endif; ?>
 
-                <form action="<?= url_to('login') ?>" method="post">
+                <form action="<?= base_url('login') ?>" method="post">
                     <?= csrf_field() ?>
 
                     <div class="form-group-modern">
@@ -349,8 +405,21 @@
                         </div>
                     </div>
 
+                    <div class="form-group-modern">
+                        <label>Kode Captcha</label>
+                        <div class="captcha-container">
+                            <img src="<?= $captchaImage ?? '' ?>" alt="Captcha" class="captcha-image" id="captcha-image">
+                            <button type="button" class="captcha-refresh" id="refresh-captcha" title="Ganti Captcha">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" name="captcha" class="captcha-input" placeholder="Masukkan kode di atas" required autocomplete="off" maxlength="5">
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn-elite">
-                        Masuk ke Dashboard <i class="fa-solid fa-arrow-right-long ml-2"></i>
+                        Login <i class="fa-solid fa-arrow-right-long ml-2"></i>
                     </button>
                 </form>
 
@@ -363,6 +432,7 @@
     </div>
 
     <script>
+        // Toggle password visibility
         const eye = document.querySelector('#eye');
         const pass = document.querySelector('#password');
         eye.addEventListener('click', () => {
@@ -373,6 +443,27 @@
             } else {
                 pass.type = 'password';
                 icon.classList.replace('fa-eye', 'fa-eye-slash');
+            }
+        });
+
+        // Refresh captcha via AJAX
+        const refreshBtn = document.getElementById('refresh-captcha');
+        const captchaImg = document.getElementById('captcha-image');
+        
+        refreshBtn.addEventListener('click', async () => {
+            refreshBtn.classList.add('loading');
+            
+            try {
+                const response = await fetch('<?= base_url('refresh-captcha') ?>');
+                const data = await response.json();
+                
+                if (data.success) {
+                    captchaImg.src = data.image;
+                }
+            } catch (error) {
+                console.error('Error refreshing captcha:', error);
+            } finally {
+                refreshBtn.classList.remove('loading');
             }
         });
     </script>

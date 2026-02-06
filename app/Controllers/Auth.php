@@ -9,14 +9,125 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class Auth extends BaseController
 {
+    /**
+     * Menampilkan halaman login dengan captcha
+     */
     public function index()
     {
-        return view('auth/login');
+        // Generate captcha
+        $captchaImage = $this->generateCaptcha();
+        
+        return view('auth/login', ['captchaImage' => $captchaImage]);
     }
 
+    /**
+     * Generate captcha image menggunakan GD library
+     */
+    private function generateCaptcha()
+    {
+        $session = session();
+        
+        // Generate random word (5 karakter A-Z, 0-9)
+        $word = $this->generateCaptchaWord(5);
+        
+        // Simpan captcha word ke session
+        $session->set('captcha_word', $word);
+        $session->set('captcha_time', time());
+        
+        // Return base64 encoded image
+        return $this->createCaptchaImage($word);
+    }
+
+    /**
+     * Generate random word untuk captcha
+     */
+    private function generateCaptchaWord($length = 5)
+    {
+        // Exclude I, O, 1, 0 to avoid confusion
+        $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $word = '';
+        for ($i = 0; $i < $length; $i++) {
+            $word .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+        return $word;
+    }
+
+    /**
+     * Create captcha image as SVG (no GD required)
+     */
+    private function createCaptchaImage($word)
+    {
+        $width = 180;
+        $height = 50;
+        
+        // Start SVG
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '">';
+        
+        // Background
+        $svg .= '<rect width="100%" height="100%" fill="#f1f5f9"/>';
+        
+        // Add noise lines
+        for ($i = 0; $i < 5; $i++) {
+            $x1 = random_int(0, $width);
+            $y1 = random_int(0, $height);
+            $x2 = random_int(0, $width);
+            $y2 = random_int(0, $height);
+            $svg .= '<line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '" stroke="#cbd5e1" stroke-width="1"/>';
+        }
+        
+        // Add decorative line
+        $svg .= '<line x1="0" y1="' . random_int(15, 35) . '" x2="' . $width . '" y2="' . random_int(15, 35) . '" stroke="#2563eb" stroke-width="2"/>';
+        
+        // Add text characters with random positioning
+        $charWidth = 30;
+        $startX = 15;
+        
+        for ($i = 0; $i < strlen($word); $i++) {
+            $char = $word[$i];
+            $x = $startX + ($i * $charWidth) + random_int(-3, 3);
+            $y = 35 + random_int(-5, 5);
+            $rotate = random_int(-15, 15);
+            $svg .= '<text x="' . $x . '" y="' . $y . '" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1e293b" transform="rotate(' . $rotate . ' ' . $x . ' ' . $y . ')">' . htmlspecialchars($char) . '</text>';
+        }
+        
+        // Border
+        $svg .= '<rect width="' . ($width - 1) . '" height="' . ($height - 1) . '" fill="none" stroke="#2563eb" stroke-width="2"/>';
+        
+        $svg .= '</svg>';
+        
+        // Return as data URI
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
+    /**
+     * Proses login dengan validasi captcha
+     */
     public function login()
     {
         $session = session();
+        
+        // Validasi captcha terlebih dahulu
+        $captchaInput = $this->request->getPost('captcha');
+        $captchaWord = $session->get('captcha_word');
+        $captchaTime = $session->get('captcha_time');
+        
+        // Cek apakah captcha expired (5 menit)
+        if (!$captchaTime || (time() - $captchaTime) > 300) {
+            $session->remove('captcha_word');
+            $session->remove('captcha_time');
+            return redirect()->to('/login')->with('error', 'Captcha sudah kedaluwarsa. Silakan coba lagi.');
+        }
+        
+        // Validasi captcha (case-insensitive)
+        if (!$captchaWord || strtoupper(trim($captchaInput)) !== strtoupper($captchaWord)) {
+            return redirect()->to('/login')->with('error', 'Captcha salah. Silakan coba lagi.');
+        }
+        
+        // Hapus captcha dari session setelah validasi berhasil
+        $session->remove('captcha_word');
+        $session->remove('captcha_time');
+        
+        // Lanjut proses autentikasi
         $model = new UserModel();
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
@@ -24,6 +135,7 @@ class Auth extends BaseController
         $user = $model->where('username', $username)->first();
         $modelpt = new UserptModel();
         $userpt = $modelpt->where('username', $username)->first();
+        
         if ($user && password_verify($password, $user['password'])) {
             $session->set('isLoggedIn', true);
             $session->set('username', $user['username']);
@@ -41,6 +153,21 @@ class Auth extends BaseController
         } else {
             return redirect()->to('/login')->with('error', 'Username atau Password salah.');
         }
+    }
+
+    /**
+     * Refresh captcha via AJAX
+     */
+    public function refreshCaptcha()
+    {
+        // Generate captcha baru
+        $captchaImage = $this->generateCaptcha();
+        
+        // Return JSON untuk AJAX
+        return $this->response->setJSON([
+            'success' => true,
+            'image'   => $captchaImage,
+        ]);
     }
 
     public function logout()
@@ -83,23 +210,20 @@ class Auth extends BaseController
             
             // Kirim email ke alamat yang TERDAFTAR di database
             $emailService = \Config\Services::email();
-            $emailService->setTo($user['email']); // Gunakan email dari database, bukan input
+            $emailService->setTo($user['email']);
             $emailService->setSubject('Kode OTP Reset Password - Sipencak LLDIKTI');
             
             $message = $this->getEmailTemplate($otp, $user['username']);
             $emailService->setMessage($message);
             
             if (!$emailService->send()) {
-                // Log error tapi tetap tampilkan pesan umum untuk keamanan
                 log_message('error', 'Email failed: ' . $emailService->printDebugger(['headers']));
             }
             
-            // Redirect ke halaman verifikasi hanya jika email terdaftar
             return redirect()->to('/verify')->with('info', 'Kode OTP telah dikirim ke email Anda. Silakan cek inbox.')
                                             ->with('reset_email', $user['email']);
         }
         
-        // Email tidak terdaftar - tampilkan error dengan jelas
         return redirect()->to('/forgot')->with('error', 'Email tidak terdaftar dalam sistem. Silakan periksa kembali email Anda.');
     }
 
@@ -133,15 +257,12 @@ class Auth extends BaseController
                             ->with('error', 'Kode OTP tidak valid atau sudah kadaluarsa.');
         }
         
-        // Cek kecocokan kode
         if ($user['reset_code'] !== $code) {
             return redirect()->to('/verify?email=' . urlencode($email))
                             ->with('error', 'Kode OTP tidak valid atau sudah kadaluarsa.');
         }
         
-        // Cek expired
         if (strtotime($user['reset_expired']) < time()) {
-            // Hapus OTP yang sudah expired
             $model->update($user['id'], [
                 'reset_code'    => null,
                 'reset_expired' => null,
@@ -150,7 +271,6 @@ class Auth extends BaseController
                             ->with('error', 'Kode OTP sudah kadaluarsa. Silakan request ulang.');
         }
         
-        // Simpan email ke session untuk proses selanjutnya
         session()->set('reset_email', $email);
         session()->set('reset_verified', true);
         
@@ -162,7 +282,6 @@ class Auth extends BaseController
      */
     public function newPassword()
     {
-        // Cek apakah sudah terverifikasi OTP
         if (!session()->get('reset_verified')) {
             return redirect()->to('/forgot')->with('error', 'Silakan verifikasi OTP terlebih dahulu.');
         }
@@ -175,7 +294,6 @@ class Auth extends BaseController
      */
     public function updatePassword()
     {
-        // Cek session
         if (!session()->get('reset_verified') || !session()->get('reset_email')) {
             return redirect()->to('/forgot')->with('error', 'Sesi tidak valid. Silakan ulangi proses reset password.');
         }
@@ -183,7 +301,6 @@ class Auth extends BaseController
         $password = $this->request->getPost('password');
         $confirmPassword = $this->request->getPost('confirm_password');
         
-        // Validasi password
         if (strlen($password) < 8) {
             return redirect()->to('/new-password')->with('error', 'Password minimal 8 karakter.');
         }
@@ -200,14 +317,12 @@ class Auth extends BaseController
             return redirect()->to('/forgot')->with('error', 'User tidak ditemukan. Silakan ulangi proses.');
         }
         
-        // Update password dan hapus OTP
         $model->update($user['id'], [
             'password'      => password_hash($password, PASSWORD_DEFAULT),
             'reset_code'    => null,
             'reset_expired' => null,
         ]);
         
-        // Hapus session reset
         session()->remove('reset_email');
         session()->remove('reset_verified');
         
