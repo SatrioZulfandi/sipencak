@@ -265,12 +265,44 @@
     </div>
 
     <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-md-end">
+        <div class="col-12 d-flex justify-content-md-end gap-2 flex-wrap">
+            <!-- Filter Status -->
+            <form action="" method="get" class="d-flex gap-2 align-items-center">
+                <div class="filter-dropdown-wrapper" style="position: relative;">
+                    <i class="fas fa-filter" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.75rem; z-index: 1;"></i>
+                    <select name="status_filter" class="filter-select-elite" onchange="this.form.submit()" style="
+                        padding: 0.5rem 1rem 0.5rem 2.2rem;
+                        border-radius: 12px;
+                        border: 2px solid var(--border-color);
+                        background: #fff;
+                        font-weight: 700;
+                        font-size: 0.8rem;
+                        color: var(--text-dark);
+                        min-width: 170px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        appearance: none;
+                        -webkit-appearance: none;
+                        background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%2364748b\"><path d=\"M7 10l5 5 5-5z\"/></svg>');
+                        background-repeat: no-repeat;
+                        background-position: right 10px center;
+                        background-size: 18px;
+                    ">
+                        <option value="">Semua Status</option>
+                        <option value="belum" <?= ($status_filter ?? '') === 'belum' ? 'selected' : '' ?>>Belum Diajukan</option>
+                        <option value="diajukan" <?= ($status_filter ?? '') === 'diajukan' ? 'selected' : '' ?>>Sudah Diajukan</option>
+                    </select>
+                </div>
+                <input type="hidden" name="keyword" value="<?= esc($keyword ?? '') ?>">
+            </form>
+            
+            <!-- Search -->
             <form action="" method="get" class="search-container">
                 <input type="text" name="keyword" class="search-input-elite"
                     placeholder="Cari NIM atau Nama Mahasiswa..."
                     value="<?= esc($keyword ?? '') ?>">
                 <i class="fas fa-search search-icon"></i>
+                <input type="hidden" name="status_filter" value="<?= esc($status_filter ?? '') ?>">
 
                 <?php if (!empty($keyword)): ?>
                     <a href="<?= base_url('verifikasi-mahasiswa/' . $id_pencairan) ?>" class="clear-search" title="Reset">

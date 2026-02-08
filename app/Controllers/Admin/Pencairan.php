@@ -533,16 +533,23 @@ class Pencairan extends BaseController
         $pt = session()->get('pt');
         $mahasiswaModel = new \App\Models\MahasiswaModel();
 
-        // Ambil keyword pencarian
+        // Ambil keyword pencarian dan status filter
         $keyword = $this->request->getGet('keyword');
+        $statusFilter = $this->request->getGet('status_filter');
 
-        // Pastikan fungsi universitas di model Anda sudah mendukung parameter keyword
-        // Jika belum, Anda bisa menambahkan filter LIKE di sini sebelum paginate
+        // Filter berdasarkan keyword
         if ($keyword) {
             $mahasiswaModel->groupStart()
                 ->like('mahasiswas.nama', $keyword)
                 ->orLike('mahasiswas.nim', $keyword)
                 ->groupEnd();
+        }
+        
+        // Filter berdasarkan status pengajuan
+        if ($statusFilter === 'belum') {
+            $mahasiswaModel->where('mahasiswas.status_pengajuan', 'Belum Diajukan');
+        } elseif ($statusFilter === 'diajukan') {
+            $mahasiswaModel->where('mahasiswas.status_pengajuan', 'Diajukan');
         }
 
         $listMahasiswa = $mahasiswaModel->universitas($pt, $id, 10);
@@ -552,7 +559,8 @@ class Pencairan extends BaseController
             'id_pencairan'  => $id,
             'mahasiswa'     => $listMahasiswa,
             'pager'         => $mahasiswaModel->pager,
-            'keyword'       => $keyword // Kirim ke view agar input tetap terisi
+            'keyword'       => $keyword,
+            'status_filter' => $statusFilter
         ];
 
         return view('admin/verifikasi_2', $data);
