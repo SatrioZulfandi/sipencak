@@ -434,6 +434,55 @@
     </div>
 </div>
 
+<!-- Modal Konfirmasi Batal -->
+<div class="modal fade" id="modalBatalPengajuan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <!-- Header dengan ikon -->
+                <div class="text-center pt-5 pb-3" style="background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 8px 20px rgba(239,68,68,0.2);">
+                        <i class="fas fa-trash-alt fa-2x" style="color: #ef4444;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #1e293b;">Batalkan Pengajuan?</h5>
+                    <p class="text-muted mb-0 px-4" style="font-size: 0.9rem;">
+                        Pengajuan akan <strong class="text-danger">dihapus permanen</strong> dan tidak masuk ke draft.
+                    </p>
+                </div>
+                
+                <!-- Info Box -->
+                <div class="px-4 py-3">
+                    <div class="p-3 rounded-3" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-exclamation-triangle mt-1" style="color: #b45309;"></i>
+                            <div>
+                                <strong style="color: #92400e; font-size: 0.85rem;">Perhatian!</strong>
+                                <p class="mb-0 text-muted" style="font-size: 0.8rem;">
+                                    Semua data mahasiswa yang dipilih akan dikembalikan ke status semula.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tombol Aksi -->
+                <div class="p-4 d-flex gap-2">
+                    <button type="button" id="btnCloseModal" class="btn flex-grow-1 fw-bold py-2" 
+                            style="background: #f1f5f9; color: #64748b; border-radius: 12px; cursor: pointer;">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali
+                    </button>
+                    <a href="<?= base_url('verifikasi-delete/' . $id_pencairan) ?>" 
+                       class="btn flex-grow-1 fw-bold py-2 text-center text-decoration-none" 
+                       style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(239,68,68,0.3); cursor: pointer;">
+                        <i class="fas fa-trash-alt me-1"></i> Ya, Hapus
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const checkAll = document.getElementById('checkAll');
@@ -486,7 +535,19 @@
         };
 
         document.getElementById('btn-save-top').addEventListener('click', () => handleAction(false, false));
-        document.getElementById('btn-cancel-top').addEventListener('click', () => handleAction(false, true));
+        
+        // Modal handling
+        let batalModal = null;
+        document.getElementById('btn-cancel-top').addEventListener('click', () => {
+            batalModal = new bootstrap.Modal(document.getElementById('modalBatalPengajuan'));
+            batalModal.show();
+        });
+        document.getElementById('btnCloseModal').addEventListener('click', () => {
+            if (batalModal) {
+                batalModal.hide();
+            }
+        });
+        
         document.getElementById('btn-ajukan').addEventListener('click', () => handleAction(true, false));
 
         document.querySelectorAll('.pembaruan-status').forEach(select => {
