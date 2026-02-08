@@ -66,10 +66,12 @@ class Pencairan extends BaseController
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
+        // PERBAIKAN: Join ke tabel pengajuan_mahasiswa
         $builder = $mahasiswaModel
-            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi')
+            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi, pengajuan_mahasiswa.status_pengajuan')
+            ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi', 'left')
-            ->where('mahasiswas.id_pencairan', $id);
+            ->where('pengajuan_mahasiswa.id_pencairan', $id);
 
         if ($search) {
             $builder->groupStart()
@@ -278,10 +280,11 @@ class Pencairan extends BaseController
 
         // Ambil data mahasiswa dengan pencairan status 'Selesai'
         $data = $mahasiswaModel
-            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi, pts.perguruan_tinggi, pts.kode_pt')
+            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi, pts.perguruan_tinggi, pts.kode_pt, pengajuan_mahasiswa.status_pengajuan')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi', 'left')
             ->join('pts', 'pts.id = mahasiswas.id_pt', 'left')
-            ->join('pencairans', 'pencairans.id = mahasiswas.id_pencairan', 'left')
+            ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
+            ->join('pencairans', 'pencairans.id = pengajuan_mahasiswa.id_pencairan')
             ->where('pencairans.status', 'Selesai')
             ->findAll();
 
@@ -360,9 +363,10 @@ class Pencairan extends BaseController
         $table = $mahasiswaModel->table;
 
         $mahasiswaList = $mahasiswaModel
-            ->select("$table.*, prodis.nama_prodi")
+            ->select("$table.*, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan")
             ->join('prodis', "prodis.id = $table.id_prodi", 'left')
-            ->where("$table.id_pencairan", $id_pencairan)
+            ->join('pengajuan_mahasiswa', "pengajuan_mahasiswa.id_mahasiswa = $table.id")
+            ->where("pengajuan_mahasiswa.id_pencairan", $id_pencairan)
             ->findAll();
 
         $spreadsheet = new Spreadsheet();
@@ -444,7 +448,7 @@ class Pencairan extends BaseController
     public function markDitolak($id)
     {
         $model = new \App\Models\PencairanModel();
-        $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
 
         $data = $model->find($id);
 
@@ -456,21 +460,14 @@ class Pencairan extends BaseController
         $alasan = $this->request->getPost('alasan');
 
         if ($data['status'] === 'Diproses') {
-            // Update mahasiswa yang terkait: reset status dan hapus id_pencairan
-            $mahasiswaModel->where('id_pencairan', $id)
-                ->set([
-                    'status_pengajuan' => 'Belum Diajukan',
-                    'id_pencairan' => null,
-                ])
-                ->update();
+            // Update mahasiswa yang terkait: HAPUS dari tabel pengajuan agar bisa diajukan ulang
+            $pengajuanModel->where('id_pencairan', $id)->delete();
 
-            // Update status pencairan dan simpan alasan (jika ada kolom alasan_tolak)
-            $updateData = ['status' => 'Ditolak'];
-
-            // Hanya jika kolom `alasan_tolak` tersedia di tabel pencairans
-            if ($model->allowedFields && in_array('alasan_tolak', $model->allowedFields)) {
-                $updateData['alasan_tolak'] = $alasan;
-            }
+            // Update status pencairan dan simpan alasan
+            $updateData = [
+                'status' => 'Ditolak',
+                'alasan_tolak' => $alasan
+            ];
 
             $model->update($id, $updateData);
 
@@ -479,13 +476,23 @@ class Pencairan extends BaseController
 
         return redirect()->back()->with('warning', 'Status tidak dapat diubah.');
     }
+
     public function revisi($id)
     {
         $model = new \App\Models\PencairanModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
+        
         $data = $model->find($id);
 
         if ($data && $data['status'] === 'Diproses') {
+            // Ubah status pencairan jadi Draft
             $model->update($id, ['status' => 'Draft']);
+            
+            // Ubah status pengajuan mahasiswa jadi 'Proses Pengajuan' agar bisa diedit
+            $pengajuanModel->where('id_pencairan', $id)
+                           ->set(['status_pengajuan' => 'Proses Pengajuan'])
+                           ->update();
+            
             return redirect()->to('pencairan-list')->with('success', 'Pengajuan dikembalikan ke Draft. Silakan edit.');
         }
 
@@ -495,16 +502,17 @@ class Pencairan extends BaseController
     public function batalkan($id)
     {
         $model = new \App\Models\PencairanModel();
-        $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
+        
         $data = $model->find($id);
 
         if ($data && $data['status'] === 'Diproses') {
-            // Lepaskan mahasiswa
-            $mahasiswaModel->where('id_pencairan', $id)
-                ->set(['id_pencairan' => null, 'status_pengajuan' => 'Belum Diajukan'])
-                ->update();
+            // Lepaskan mahasiswa (Hapus dari tabel pengajuan)
+            $pengajuanModel->where('id_pencairan', $id)->delete();
             
-            // Update status ke Ditolak (sesuai request user: Dibatalkan = Ditolak)
+            // Update status ke Ditolak (sesuai req user: Batalkan = Tolak/Hapus)
+            // Atau jika "Cancel" berarti hapus data pencairannya juga?
+            // Existing code: update status to Ditolak.
             $model->update($id, [
                 'status' => 'Ditolak',
                 'alasan_tolak' => 'Dibatalkan oleh Operator'

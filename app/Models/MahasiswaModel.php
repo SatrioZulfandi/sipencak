@@ -70,12 +70,7 @@ class MahasiswaModel extends Model
 
     /**
      * PERBAIKAN: Logika per-semester untuk pengajuan KIP.
-     * Mahasiswa bisa diajukan kembali di semester berbeda,
-     * tapi tidak bisa diajukan 2x dalam semester yang sama.
-     * 
-     * Logika:
-     * - Mahasiswa dikecualikan HANYA jika sudah "Diajukan" di semester+periode yang SAMA
-     * - Mahasiswa yang sudah diajukan di semester LAIN tetap muncul
+     * Menggunakan tabel pengajuan_mahasiswa untuk tracking multi-periode.
      */
     public function universitas($pt, $id_pencairan_aktif = null, $perPage = 10)
     {
@@ -88,46 +83,62 @@ class MahasiswaModel extends Model
         $periodeAktif = $pencairanAktif['periode'] ?? null;
         
         // Cari ID mahasiswa yang sudah FINAL (status=Diajukan) di semester+periode yang SAMA
-        $subquery = $db->table('mahasiswas m')
-            ->select('m.id')
-            ->join('pencairans p', 'p.id = m.id_pencairan')
-            ->where('m.id_pt', $pt)
-            ->where('m.status_pengajuan', 'Diajukan')
+        // TAPI bukan di pencairan yang sedang aktif ini (jika sedang edit draft)
+        $subquery = $db->table('pengajuan_mahasiswa pm')
+            ->select('pm.id_mahasiswa')
+            ->join('pencairans p', 'p.id = pm.id_pencairan')
+            ->where('pm.status_pengajuan', 'Diajukan')
             ->where('p.semester', $semesterAktif)
-            ->where('p.periode', $periodeAktif)
-            ->where('p.id !=', $id_pencairan_aktif)
-            ->get()->getResultArray();
-        
-        $idSudahFinal = array_column($subquery, 'id');
-        
-        // Query utama: ambil semua mahasiswa dari PT ini
-        $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi')
-            ->join('prodis', 'prodis.id = mahasiswas.id_prodi')
-            ->where('mahasiswas.id_pt', $pt);
-        
-        // Kecualikan yang sudah FINAL di semester+periode yang sama
-        if (!empty($idSudahFinal)) {
-            $builder->whereNotIn('mahasiswas.id', $idSudahFinal);
+            ->where('p.periode', $periodeAktif);
+            
+        if ($id_pencairan_aktif) {
+            $subquery->where('pm.id_pencairan !=', $id_pencairan_aktif);
+        }
+            
+        $idsSudahFinal = $subquery->get()->getResultArray();
+        $idSudahFinal = array_column($idsSudahFinal, 'id_mahasiswa');
+
+        // Cari ID mahasiswa yang sedang dalam "Proses Pengajuan" di pencairan LAIN (draft lain)
+        // untuk mencegah satu mahasiswa ada di 2 draft sekaligus
+        $subqueryDraft = $db->table('pengajuan_mahasiswa pm')
+            ->select('pm.id_mahasiswa')
+            ->where('pm.status_pengajuan', 'Proses Pengajuan');
+            
+        if ($id_pencairan_aktif) {
+            $subqueryDraft->where('pm.id_pencairan !=', $id_pencairan_aktif);
         }
         
-        // Kecualikan yang sedang dalam proses pengajuan LAIN (bukan pencairan ini)
-        $builder->groupStart()
-            ->where('mahasiswas.id_pencairan', null)
-            ->orWhere('mahasiswas.id_pencairan', $id_pencairan_aktif)
-            ->orWhere('mahasiswas.status_pengajuan !=', 'Proses Pengajuan')
-        ->groupEnd();
+        $idsDraftLain = $subqueryDraft->get()->getResultArray();
+        $idDraftLain = array_column($idsDraftLain, 'id_mahasiswa');
+        
+        // Gabungkan ID yang harus di-exclude
+        $excludedIds = array_unique(array_merge($idSudahFinal, $idDraftLain));
+        
+        // Query utama: ambil semua mahasiswa dari PT ini
+        $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi, pm_aktif.status_pengajuan as status_di_pencairan_ini')
+            ->join('prodis', 'prodis.id = mahasiswas.id_prodi')
+            // Join ke pengajuan_mahasiswa KHUSUS untuk pencairan ini saja (untuk tahu status checked/unchecked)
+            ->join('pengajuan_mahasiswa pm_aktif', 'pm_aktif.id_mahasiswa = mahasiswas.id AND pm_aktif.id_pencairan = ' . $db->escape($id_pencairan_aktif), 'left')
+            ->where('mahasiswas.id_pt', $pt);
+        
+        // Kecualikan yang sudah FINAL atau Draft Lain
+        if (!empty($excludedIds)) {
+            $builder->whereNotIn('mahasiswas.id', $excludedIds);
+        }
 
         return $this->paginate($perPage, 'default');
     }
 
     /**
      * Digunakan untuk list verifikasi mahasiswa dalam satu pencairan
+     * Mengambil data dari tabel pengajuan_mahasiswa
      */
-    public function verifikasi($id, $keyword = null)
+    public function verifikasi($id_pencairan, $keyword = null)
     {
-        $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi')
+        $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan')
+            ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi')
-            ->where('mahasiswas.id_pencairan', $id);
+            ->where('pengajuan_mahasiswa.id_pencairan', $id_pencairan);
 
         if ($keyword) {
             $builder->groupStart()
@@ -142,12 +153,13 @@ class MahasiswaModel extends Model
     /**
      * Digunakan untuk halaman detail pencairan (lengkap dengan data PT)
      */
-    public function pencairan($id, $keyword = null)
+    public function pencairan($id_pencairan, $keyword = null)
     {
-        $this->select('mahasiswas.*, pts.perguruan_tinggi, pts.kode_pt, prodis.kode_prodi, prodis.nama_prodi')
+        $this->select('mahasiswas.*, pts.perguruan_tinggi, pts.kode_pt, prodis.kode_prodi, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan, pengajuan_mahasiswa.id as id_pengajuan')
+            ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
             ->join('pts', 'pts.id = mahasiswas.id_pt')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi')
-            ->where('mahasiswas.id_pencairan', $id);
+            ->where('pengajuan_mahasiswa.id_pencairan', $id_pencairan);
 
         // Jika ada keyword, lakukan filter pencarian
         if (!empty($keyword)) {

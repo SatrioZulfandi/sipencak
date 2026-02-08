@@ -65,10 +65,11 @@ class Pencairan extends BaseController
         $mahasiswaModel = new \App\Models\MahasiswaModel();
 
         $data = $mahasiswaModel
-            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi, pts.perguruan_tinggi, pts.kode_pt')
+            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi, pts.perguruan_tinggi, pts.kode_pt, pengajuan_mahasiswa.status_pengajuan')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi', 'left')
             ->join('pts', 'pts.id = mahasiswas.id_pt', 'left')
-            ->join('pencairans', 'pencairans.id = mahasiswas.id_pencairan', 'left')
+            ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
+            ->join('pencairans', 'pencairans.id = pengajuan_mahasiswa.id_pencairan')
             ->where('pencairans.status', 'Selesai')
             ->findAll();
 
@@ -148,9 +149,10 @@ class Pencairan extends BaseController
 
         $table = $mahasiswaModel->table;
         $mahasiswaList = $mahasiswaModel
-            ->select("$table.*, prodis.nama_prodi")
+            ->select("$table.*, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan")
             ->join('prodis', "prodis.id = $table.id_prodi", 'left')
-            ->where("$table.id_pencairan", $id_pencairan)
+            ->join('pengajuan_mahasiswa', "pengajuan_mahasiswa.id_mahasiswa = $table.id")
+            ->where("pengajuan_mahasiswa.id_pencairan", $id_pencairan)
             ->findAll();
 
         $spreadsheet = new Spreadsheet();
@@ -569,21 +571,43 @@ class Pencairan extends BaseController
     public function sync_mahasiswa()
     {
         $json = $this->request->getJSON();
-        $model = new \App\Models\MahasiswaModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
 
         $ids = $json->selected_ids;
         $idPencairan = $json->id_pencairan;
         $isChecked = $json->checked;
 
         if (!empty($ids)) {
-            $dataUpdate = [
-                'id_pencairan'     => $isChecked ? $idPencairan : null,
-                // Perubahan di sini: jika false, set ke 'Belum Diajukan'
-                'status_pengajuan' => $isChecked ? 'Proses Pengajuan' : 'Belum Diajukan'
-            ];
-
-            // Update database secara massal untuk ID yang dikirim
-            $model->whereIn('id', $ids)->set($dataUpdate)->update();
+            if ($isChecked) {
+                // Insert/Update menjadi 'Proses Pengajuan'
+                foreach ($ids as $id_mahasiswa) {
+                    // Gunakan replace atau insert ignore handling di model/query manual
+                    // Tapi karena CodeIgniter model save() cek primary key, kita pakai logic manual
+                    
+                    // Cek existency
+                    $exist = $pengajuanModel->where('id_mahasiswa', $id_mahasiswa)
+                                          ->where('id_pencairan', $idPencairan)
+                                          ->first();
+                    
+                    if ($exist) {
+                        $pengajuanModel->update($exist['id'], [
+                            'status_pengajuan' => 'Proses Pengajuan'
+                        ]);
+                    } else {
+                        $pengajuanModel->insert([
+                            'id_mahasiswa' => $id_mahasiswa,
+                            'id_pencairan' => $idPencairan,
+                            'status_pengajuan' => 'Proses Pengajuan',
+                            'created_at' => date('Y-m-d H:i:s')
+                        ]);
+                    }
+                }
+            } else {
+                // Hapus dari pengajuan_mahasiswa
+                $pengajuanModel->whereIn('id_mahasiswa', $ids)
+                               ->where('id_pencairan', $idPencairan)
+                               ->delete();
+            }
         }
 
         return $this->response->setJSON(['success' => true]);
@@ -601,46 +625,58 @@ class Pencairan extends BaseController
                 return $this->response->setJSON(['success' => false, 'message' => 'ID Pencairan tidak ditemukan.']);
             }
 
-            $model = new MahasiswaModel();
+            $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
+            $pencairanModel = new \App\Models\PencairanModel();
             $db = \Config\Database::connect();
+            
+            // Ambil info periode pencairan ini
+            $pencairan = $pencairanModel->find($idPencairan);
+            $semester = $pencairan['semester'];
+            $periode = $pencairan['periode'];
 
             $db->transStart();
 
-            // 1. Validasi Ganda
+            // 1. Validasi Ganda: Cek apakah mahasiswa ini sudah Diajukan (Final) di pencairan LAIN pada periode yang SAMA
             if (!empty($selected)) {
-                $isUsed = $model->whereIn('id', $selected)
-                    ->where('status_pengajuan', 'Diajukan')
-                    ->first();
-                if ($isUsed) {
-                    $db->transRollback();
-                    return $this->response->setJSON(['success' => false, 'message' => 'Salah satu mahasiswa sudah terdaftar di pengajuan Final.']);
+                foreach ($selected as $mhsId) {
+                    if ($pengajuanModel->isFinalInSamePeriode($mhsId, $semester, $periode, $idPencairan)) {
+                        $db->transRollback();
+                        return $this->response->setJSON(['success' => false, 'message' => 'Salah satu mahasiswa sudah terdaftar di pengajuan Final pada periode ini.']);
+                    }
                 }
             }
 
-            // 2. Reset status mahasiswa yang batal dicentang
+            // 2. Reset status mahasiswa yang batal dicentang (Hapus dari tabel pengajuan)
             if (!empty($all)) {
                 $notSelected = array_diff($all, $selected);
                 if (!empty($notSelected)) {
-                    $model->whereIn('id', $notSelected)
+                    $pengajuanModel->whereIn('id_mahasiswa', $notSelected)
                         ->where('id_pencairan', $idPencairan)
-                        ->set([
-                            'status_pengajuan' => 'Belum Diajukan', // Memastikan kembali ke status awal
-                            'id_pencairan' => null
-                        ])
-                        ->update();
+                        ->delete();
                 }
             }
 
-            // 3. Update mahasiswa yang terpilih
+            // 3. Update mahasiswa yang terpilih (Insert/Update)
             if (!empty($selected)) {
-                $model->whereIn('id', $selected)
-                    ->set(['status_pengajuan' => 'Proses Pengajuan', 'id_pencairan' => $idPencairan])
-                    ->update();
+                foreach ($selected as $mhsId) {
+                    $exist = $pengajuanModel->where('id_mahasiswa', $mhsId)
+                                          ->where('id_pencairan', $idPencairan)
+                                          ->first();
+                    if ($exist) {
+                        $pengajuanModel->update($exist['id'], ['status_pengajuan' => 'Proses Pengajuan']);
+                    } else {
+                        $pengajuanModel->insert([
+                            'id_mahasiswa' => $mhsId,
+                            'id_pencairan' => $idPencairan,
+                            'status_pengajuan' => 'Proses Pengajuan',
+                            'created_at' => date('Y-m-d H:i:s')
+                        ]);
+                    }
+                }
             }
 
             // 4 & 5. Hitung ulang dan Update Tabel Pencairan
-            $jumlahRiil = $model->where('id_pencairan', $idPencairan)->countAllResults();
-            $pencairanModel = new \App\Models\PencairanModel();
+            $jumlahRiil = $pengajuanModel->where('id_pencairan', $idPencairan)->countAllResults();
             $pencairanModel->update($idPencairan, [
                 'status' => 'Finalisasi',
                 'jumlah_mahasiswa' => $jumlahRiil
@@ -662,6 +698,7 @@ class Pencairan extends BaseController
     public function finalisasi_verifikasi($id)
     {
         $mahasiswaModel = new MahasiswaModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel(); // Use new model for count
         $db = \Config\Database::connect();
 
         // Ambil keyword dari input search
@@ -672,7 +709,8 @@ class Pencairan extends BaseController
             ->get()
             ->getRowArray();
 
-        $jumlahTotal = $db->table('mahasiswas')->where('id_pencairan', $id)->countAllResults();
+        // Hitung dari tabel pengajuan_mahasiswa
+        $jumlahTotal = $pengajuanModel->where('id_pencairan', $id)->countAllResults();
 
         $data = [
             'mahasiswa'    => $mahasiswaModel->verifikasi($id, $keyword),
@@ -681,7 +719,7 @@ class Pencairan extends BaseController
             'pager'        => $mahasiswaModel->pager,
             'jumlah'       => $jumlahTotal,
             'pt'           => $pt,
-            'keyword'      => $keyword // Kirim ke view agar input tidak kosong setelah refresh
+            'keyword'      => $keyword
         ];
 
         return view('admin/verifikasi_3', $data);
@@ -693,17 +731,17 @@ class Pencairan extends BaseController
         $db->transStart();
 
         $pencairanModel = new \App\Models\PencairanModel();
-        $mahasiswaModel = new MahasiswaModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
 
-        // Hitung ulang sebelum benar-benar diproses
-        $jumlah = $mahasiswaModel->where('id_pencairan', $id)->countAllResults();
+        // Hitung ulang dari tabel pengajuan
+        $jumlah = $pengajuanModel->where('id_pencairan', $id)->countAllResults();
 
         if ($jumlah <= 0) {
             return redirect()->back()->with('error', 'Gagal: Jumlah mahasiswa 0. Silakan pilih mahasiswa kembali.');
         }
 
-        // Update status mahasiswa secara massal
-        $mahasiswaModel->where('id_pencairan', $id)
+        // Update status mahasiswa secara massal di tabel pengajuan_mahasiswa
+        $pengajuanModel->where('id_pencairan', $id)
             ->set(['status_pengajuan' => 'Diajukan'])
             ->update();
 
@@ -724,23 +762,17 @@ class Pencairan extends BaseController
     public function delete($id)
     {
         $model = new PencairanModel();
-        $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
         $db = \Config\Database::connect();
 
         // 1. Ambil data pencairan untuk menghapus file fisik
         $data = $model->find($id);
 
         if ($data) {
-            $db->transStart(); // Gunakan transaksi agar proses reset & hapus sinkron
+            $db->transStart(); // Gunakan transaksi aga reset & hapus sinkron
 
-            // 2. RESET RELASI MAHASISWA
-            // Mengembalikan status mahasiswa agar bisa dipilih kembali di pengajuan baru
-            $mahasiswaModel->where('id_pencairan', $id)
-                ->set([
-                    'id_pencairan'     => null,
-                    'status_pengajuan' => 'Belum Diajukan'
-                ])
-                ->update();
+            // 2. HAPUS RELASI MAHASISWA (Delete dari tabel pengajuan_mahasiswa)
+            $pengajuanModel->where('id_pencairan', $id)->delete();
 
             // 3. HAPUS FILE FISIK
             $folder = 'file/';

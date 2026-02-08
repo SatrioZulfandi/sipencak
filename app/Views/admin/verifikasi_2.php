@@ -383,12 +383,12 @@
                                 <td>
                                     <input type="checkbox"
                                         class="check-item checkbox-custom"
-                                        <?= ($mhs['status_pengajuan'] == 'Proses Pengajuan' || $mhs['id_pencairan'] == $id_pencairan) ? 'checked' : '' ?>
+                                        <?= (!empty($mhs['status_di_pencairan_ini']) && $mhs['status_di_pencairan_ini'] == 'Proses Pengajuan') ? 'checked' : '' ?>
                                         value="<?= $mhs['id'] ?>"
                                         data-nim="<?= $mhs['nim'] ?>">
                                 </td>
                                 <td class="fw-bold text-primary"><?= esc($mhs['nim']) ?></td>
-                                <td><span class="badge-status-mhs"><?= esc($mhs['status_pengajuan']) ?></span></td>
+                                <td><span class="badge-status-mhs"><?= esc($mhs['status_di_pencairan_ini'] ?? 'Belum Diajukan') ?></span></td>
                                 <td class="fw-bold"><?= esc($mhs['nama']) ?></td>
                                 <td><?= esc($mhs['kode_prodi']) ?></td>
                                 <td><?= esc($mhs['nama_prodi']) ?></td>
