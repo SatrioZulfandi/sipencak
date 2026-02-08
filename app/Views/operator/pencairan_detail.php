@@ -291,26 +291,8 @@
                         <i class="fas fa-times-circle"></i> DITOLAK
                     </div>
                 <?php else: ?>
-                    <div class="d-flex flex-column align-items-end gap-2">
-                        <div class="status-badge-modern status-proses">
-                            <i class="fas fa-spinner fa-spin"></i> <?= strtoupper(esc($data['status'] ?? 'PROSES')) ?>
-                        </div>
-                        <?php if ($data['status'] === 'Diproses'): ?>
-                            <div class="d-flex gap-2">
-                                <form action="<?= base_url('pencairan/revisi/' . $data['id']) ?>" method="post" onsubmit="return confirm('Edit kembali pengajuan ini? Status akan berubah menjadi Draft.')">
-                                    <?= csrf_field() ?>
-                                    <button class="btn-action btn-warning-custom shadow-sm" style="height: 32px; padding: 0 1rem; font-size: 0.75rem;">
-                                        <i class="fas fa-edit me-1"></i> Edit
-                                    </button>
-                                </form>
-                                <form action="<?= base_url('pencairan/batalkan/' . $data['id']) ?>" method="post" onsubmit="return confirm('Yakin ingin membatalkan? Data pengajuan akan dihapus.')">
-                                    <?= csrf_field() ?>
-                                    <button class="btn-action btn-table-reject shadow-sm" style="height: 32px; padding: 0 1rem; font-size: 0.75rem;">
-                                        <i class="fas fa-trash me-1"></i> Batalkan
-                                    </button>
-                                </form>
-                            </div>
-                        <?php endif; ?>
+                    <div class="status-badge-modern status-proses">
+                        <i class="fas fa-spinner fa-spin"></i> <?= strtoupper(esc($data['status'] ?? 'PROSES')) ?>
                     </div>
                 <?php endif ?>
             </div>
@@ -372,11 +354,13 @@
                 <thead>
                     <tr>
                         <th width="60" class="text-center">No</th>
-                        <th width="150">NIM</th>
+                        <th>NIM</th>
                         <th>Nama Lengkap</th>
                         <th>Program Studi</th>
+                        <th class="text-center">Jenjang</th>
                         <th class="text-center">Angkatan</th>
-                        <th>Status Perubahan</th>
+                        <th>Kategori</th>
+                        <th class="text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -388,20 +372,24 @@
                             <tr>
                                 <td class="text-center text-muted"><?= $no++ ?></td>
                                 <td class="text-primary fw-800"><?= esc($mhs['nim']) ?></td>
-                                <td><?= esc($mhs['nama']) ?></td>
+                                <td class="fw-700"><?= esc($mhs['nama']) ?></td>
                                 <td>
-                                    <div class="fw-700"><?= esc($mhs['prodi'] ?? '-') ?></div>
-                                    <div class="text-muted" style="font-size: 0.7rem;"><?= esc($mhs['jenjang'] ?? 'S1') ?></div>
+                                    <div class="fw-700"><?= esc($mhs['nama_prodi'] ?? '-') ?></div>
+                                    <div class="text-muted" style="font-size: 0.7rem;"><?= esc($mhs['kode_prodi'] ?? '-') ?></div>
                                 </td>
+                                <td class="text-center"><?= esc($mhs['jenjang'] ?? '-') ?></td>
                                 <td class="text-center fw-700"><?= esc($mhs['angkatan']) ?></td>
-                                <td>
-                                    <span class="text-primary"><?= esc($mhs['pembaruan_status'] ?? '-') ?></span>
+                                <td><span class="badge bg-light text-dark border-0 py-1 px-2" style="font-size: 9px; font-weight: 800;"><?= esc($mhs['kategori'] ?? '-') ?></span></td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary-subtle text-primary border-0 fw-bold" style="font-size: 10px; background: #eff6ff;">
+                                        <?= esc($mhs['pembaruan_status'] ?? '-') ?>
+                                    </span>
                                 </td>
                             </tr>
                         <?php endforeach ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">Data mahasiswa tidak ditemukan.</td>
+                            <td colspan="8" class="text-center py-5 text-muted">Data mahasiswa tidak ditemukan.</td>
                         </tr>
                     <?php endif ?>
                 </tbody>

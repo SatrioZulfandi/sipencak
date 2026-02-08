@@ -66,12 +66,15 @@ class Pencairan extends BaseController
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
-        $builder = $mahasiswaModel->where('id_pencairan', $id);
+        $builder = $mahasiswaModel
+            ->select('mahasiswas.*, prodis.nama_prodi, prodis.kode_prodi')
+            ->join('prodis', 'prodis.id = mahasiswas.id_prodi', 'left')
+            ->where('mahasiswas.id_pencairan', $id);
 
         if ($search) {
             $builder->groupStart()
-                ->like('nama', $search)
-                ->orLike('nim', $search)
+                ->like('mahasiswas.nama', $search)
+                ->orLike('mahasiswas.nim', $search)
                 ->groupEnd();
         }
 

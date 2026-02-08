@@ -226,7 +226,7 @@
             <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.02em;">Detail Permohonan</h4>
         </div>
 
-        <?php if ($data['status'] === 'Diproses'): ?>
+        <?php if ($data['status'] === 'Diproses' && session()->get('role') === 'operator'): ?>
             <div class="d-flex">
                 <a href="<?= base_url('verifikasi-edit/' . $data['id']) ?>" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center mr-2">
                     <i class="fas fa-pen mr-2"></i> Edit
@@ -260,11 +260,11 @@
                 <div class="info-label">Status</div>
                 <div class="mt-1">
                     <?php if ($data['status'] === 'Selesai'): ?>
-                        <div class="badge-elite badge-elite-success" data-bs-toggle="modal" data-bs-target="#modalSelesai">
+                        <div class="badge-elite badge-elite-success" data-toggle="modal" data-target="#modalSelesai" style="cursor: pointer;">
                             <i class="fas fa-check-circle"></i> Selesai <i class="fas fa-info-circle opacity-50"></i>
                         </div>
                     <?php elseif ($data['status'] === 'Ditolak'): ?>
-                        <div class="badge-elite badge-elite-danger" data-bs-toggle="modal" data-bs-target="#modalTolak">
+                        <div class="badge-elite badge-elite-danger" data-toggle="modal" data-target="#modalTolak" style="cursor: pointer;">
                             <i class="fas fa-times-circle"></i> Ditolak <i class="fas fa-info-circle opacity-50"></i>
                         </div>
                     <?php else: ?>
@@ -412,7 +412,7 @@
             <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
                 <div class="modal-header bg-danger text-white border-0 py-3 px-4">
                     <h6 class="modal-title fw-bold"><i class="fas fa-exclamation-circle me-2"></i> Alasan Penolakan</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="bg-light p-4 rounded-4 border-start border-4 border-danger">
@@ -422,14 +422,14 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 pb-4 justify-content-center">
-                    <button type="button" class="btn btn-dark rounded-pill px-5 fw-bold btn-sm shadow-sm" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-dark rounded-pill px-5 fw-bold btn-sm shadow-sm" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
     </div>
 <?php endif; ?>
 
-<?php if ($data['status'] === 'Diproses'): ?>
+<?php if ($data['status'] === 'Diproses' && session()->get('role') === 'operator'): ?>
     <div class="modal fade" id="modalTolakAdmin" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">

@@ -27,7 +27,7 @@ class Pencairan extends BaseController
 
         // Query Dasar
         $model->where('id_pt', $pt)
-            ->whereIn('status', ['Diproses', 'Selesai']);
+            ->whereIn('status', ['Diproses', 'Selesai', 'Ditolak']);
 
         // Logika Pencarian
         if ($keyword) {

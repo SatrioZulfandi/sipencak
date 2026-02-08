@@ -349,10 +349,8 @@
                                     <div class="d-flex justify-content-center gap-2">
                                         <a href="/pencairan-detail/<?= $item['id'] ?>" class="btn-table-action btn-table-view" title="Detail Pengajuan"><i class="fas fa-eye"></i></a>
                                         <?php if ($item['status'] === 'Diproses' && session()->get('role') === 'operator'): ?>
-                                            <form action="<?= base_url('pencairan/selesai/' . $item['id']) ?>" method="post" onsubmit="return confirm('Selesaikan pengajuan?')">
-                                                <?= csrf_field() ?><button type="submit" class="btn-table-action btn-table-check"><i class="fas fa-check"></i></button>
-                                            </form>
-                                            <button type="button" class="btn-table-action btn-table-reject" data-toggle="modal" data-target="#modalBatalkan<?= $item['id'] ?>" title="Batalkan Pengajuan"><i class="fas fa-times"></i></button>
+                                            <button type="button" class="btn-table-action btn-table-check" data-toggle="modal" data-target="#modalSelesaikan<?= $item['id'] ?>" title="Selesaikan Pengajuan"><i class="fas fa-check"></i></button>
+                                            <button type="button" class="btn-table-action btn-table-reject" data-toggle="modal" data-target="#modalBatalkan<?= $item['id'] ?>" title="Tolak Pengajuan"><i class="fas fa-times"></i></button>
                                         <?php endif ?>
                                     </div>
                                 </td>
@@ -408,21 +406,49 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalSelesaikan<?= $item['id'] ?>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
+                <form action="<?= base_url('pencairan/selesai/' . $item['id']) ?>" method="post">
+                    <?= csrf_field() ?>
+                    <div class="modal-header border-0 p-4 pb-0">
+                        <h5 class="fw-800 mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Konfirmasi Persetujuan</h5>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-clipboard-check text-success" style="font-size: 3rem;"></i>
+                        </div>
+                        <p class="mb-2 text-dark fw-bold">Apakah Anda yakin ingin menyetujui pengajuan ini?</p>
+                        <p class="small text-muted mb-0">Status pengajuan akan berubah menjadi <b class="text-success">Selesai</b> dan data akan diteruskan ke tahap pencairan.</p>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+                        <button type="button" class="btn-action bg-light text-muted" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-action bg-success text-white">Ya, Setujui Pengajuan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalBatalkan<?= $item['id'] ?>" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
-                <form action="<?= base_url('pencairan/batalkan/' . $item['id']) ?>" method="post">
+                <form action="<?= base_url('pencairan/ditolak/' . $item['id']) ?>" method="post">
                     <?= csrf_field() ?>
                     <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="fw-800 mb-0 text-danger"><i class="fas fa-times-circle me-2"></i> Konfirmasi Pembatalan</h5>
+                        <h5 class="fw-800 mb-0 text-danger"><i class="fas fa-times-circle me-2"></i> Tolak Pengajuan</h5>
                     </div>
-                    <div class="modal-body p-4 text-center">
-                        <p class="mb-3 text-dark fw-bold">Apakah Anda yakin ingin membatalkan pengajuan ini?</p>
-                        <p class="small text-muted mb-0">Status akan berubah menjadi <b>Dibatalkan</b>. Data Anda tidak akan dihapus dan mahasiswa dapat diajukan kembali.</p>
+                    <div class="modal-body p-4">
+                        <p class="mb-3 text-dark fw-bold text-center">Apakah Anda yakin ingin menolak pengajuan ini?</p>
+                        <div class="mb-3">
+                            <label class="form-label fw-700 small">Alasan Penolakan <span class="text-danger">*</span></label>
+                            <textarea name="alasan" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..." required></textarea>
+                        </div>
+                        <p class="small text-muted mb-0 text-center">Status akan berubah menjadi <b>Ditolak</b>. Mahasiswa dapat diajukan kembali di periode berikutnya.</p>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
                         <button type="button" class="btn-action bg-light text-muted" data-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn-action bg-danger text-white">Ya, Batalkan Pengajuan</button>
+                        <button type="submit" class="btn-action bg-danger text-white">Ya, Tolak Pengajuan</button>
                     </div>
                 </form>
             </div>
