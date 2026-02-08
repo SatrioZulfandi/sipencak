@@ -139,6 +139,7 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->post('ajukan-mahasiswa', 'Admin\Pencairan::ajukanMahasiswa');
     $routes->group('admin', ['filter' => 'adminAuth'], function ($routes) {
         $routes->get('pencairan/draft', 'Admin\Pencairan::draft');
+        $routes->post('pencairan/delete-empty-drafts', 'Admin\Pencairan::deleteEmptyDrafts');
     });
 
     // 3

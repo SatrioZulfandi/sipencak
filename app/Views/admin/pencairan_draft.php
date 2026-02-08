@@ -200,12 +200,29 @@
     </div>
 
     <div class="card-modern-elite">
-        <div class="p-4 border-bottom bg-light d-flex justify-content-between align-items-center">
+<div class="p-4 border-bottom bg-light d-flex justify-content-between align-items-center">
             <h6 class="fw-bold mb-0 text-primary uppercase"><i class="fas fa-layer-group me-2"></i> Antrean Draft Aktif</h6>
-            <span class="badge bg-white text-primary border px-3 py-2 rounded-pill shadow-sm small fw-bold">
-                Total Keseluruhan: <?= $pager->getTotal() ?> Data
-            </span>
+            <div class="d-flex align-items-center gap-2">
+                <?php if (isset($emptyDraftCount) && $emptyDraftCount > 0): ?>
+                <form action="<?= base_url('admin/pencairan/delete-empty-drafts') ?>" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus semua draft kosong (<?= $emptyDraftCount ?> draft)?')">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
+                        <i class="fas fa-trash-alt me-1"></i> Hapus <?= $emptyDraftCount ?> Draft Kosong
+                    </button>
+                </form>
+                <?php endif; ?>
+                <span class="badge bg-white text-primary border px-3 py-2 rounded-pill shadow-sm small fw-bold">
+                    Total Keseluruhan: <?= $pager->getTotal() ?> Data
+                </span>
+            </div>
         </div>
+        
+        <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show m-3 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php endif; ?>
 
         <div class="card-body p-0">
             <div class="table-responsive">

@@ -394,6 +394,15 @@ class Pencairan extends BaseController
     {
         $pt = session()->get('pt');
         $pencairanModel = new \App\Models\PencairanModel();
+        
+        // AUTO-DELETE: Hapus draft kosong (0 mahasiswa) yang lebih dari 14 hari
+        $cutoffDate = date('Y-m-d', strtotime('-14 days'));
+        $pencairanModel
+            ->where('id_pt', $pt)
+            ->where('jumlah_mahasiswa', 0)
+            ->where('tanggal_entry <', $cutoffDate)
+            ->whereIn('status', ['Ajukan Mahasiswa', 'Finalisasi'])
+            ->delete();
 
         $data = [
             'title' => 'Draft Permohonan Pencairan',
@@ -405,9 +414,32 @@ class Pencairan extends BaseController
                 ->orderBy('id', 'DESC')
                 ->paginate(10, 'default'),
             'pager' => $pencairanModel->pager,
+            // Hitung jumlah draft kosong untuk tombol
+            'emptyDraftCount' => $pencairanModel
+                ->where('id_pt', $pt)
+                ->where('jumlah_mahasiswa', 0)
+                ->whereIn('status', ['Ajukan Mahasiswa', 'Finalisasi'])
+                ->countAllResults(),
         ];
 
         return view('admin/pencairan_draft', $data);
+    }
+    
+    /**
+     * Hapus semua draft kosong (0 mahasiswa)
+     */
+    public function deleteEmptyDrafts()
+    {
+        $pt = session()->get('pt');
+        $pencairanModel = new \App\Models\PencairanModel();
+        
+        $deleted = $pencairanModel
+            ->where('id_pt', $pt)
+            ->where('jumlah_mahasiswa', 0)
+            ->whereIn('status', ['Ajukan Mahasiswa', 'Finalisasi'])
+            ->delete();
+        
+        return redirect()->to('admin/pencairan/draft')->with('success', 'Draft kosong berhasil dihapus.');
     }
 
     public function update($id)

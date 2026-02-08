@@ -42,6 +42,27 @@
     .table-responsive-elite {
         padding: 0;
         margin: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Styled Scrollbar */
+    .table-responsive-elite::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .table-responsive-elite::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    .table-responsive-elite::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+    }
+    
+    .table-responsive-elite::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
     }
 
     .table-elite {

@@ -69,22 +69,54 @@ class MahasiswaModel extends Model
     }
 
     /**
-     * PERBAIKAN SEMPURNA: Digunakan untuk halaman seleksi/ajukan mahasiswa.
-     * Menggabungkan Logika Anti-Bentrok + Pagination.
+     * PERBAIKAN: Logika per-semester untuk pengajuan KIP.
+     * Mahasiswa bisa diajukan kembali di semester berbeda,
+     * tapi tidak bisa diajukan 2x dalam semester yang sama.
+     * 
+     * Logika:
+     * - Mahasiswa dikecualikan HANYA jika sudah "Diajukan" di semester+periode yang SAMA
+     * - Mahasiswa yang sudah diajukan di semester LAIN tetap muncul
      */
     public function universitas($pt, $id_pencairan_aktif = null, $perPage = 10)
     {
+        $db = \Config\Database::connect();
+        
+        // Ambil info semester dari pencairan yang sedang aktif
+        $pencairanModel = new \App\Models\PencairanModel();
+        $pencairanAktif = $pencairanModel->find($id_pencairan_aktif);
+        $semesterAktif = $pencairanAktif['semester'] ?? null;
+        $periodeAktif = $pencairanAktif['periode'] ?? null;
+        
+        // Cari ID mahasiswa yang sudah FINAL (status=Diajukan) di semester+periode yang SAMA
+        $subquery = $db->table('mahasiswas m')
+            ->select('m.id')
+            ->join('pencairans p', 'p.id = m.id_pencairan')
+            ->where('m.id_pt', $pt)
+            ->where('m.status_pengajuan', 'Diajukan')
+            ->where('p.semester', $semesterAktif)
+            ->where('p.periode', $periodeAktif)
+            ->where('p.id !=', $id_pencairan_aktif)
+            ->get()->getResultArray();
+        
+        $idSudahFinal = array_column($subquery, 'id');
+        
+        // Query utama: ambil semua mahasiswa dari PT ini
         $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi')
-            ->where('mahasiswas.id_pt', $pt)
-            ->where('mahasiswas.status_pengajuan !=', 'Diajukan');
-
+            ->where('mahasiswas.id_pt', $pt);
+        
+        // Kecualikan yang sudah FINAL di semester+periode yang sama
+        if (!empty($idSudahFinal)) {
+            $builder->whereNotIn('mahasiswas.id', $idSudahFinal);
+        }
+        
+        // Kecualikan yang sedang dalam proses pengajuan LAIN (bukan pencairan ini)
         $builder->groupStart()
             ->where('mahasiswas.id_pencairan', null)
             ->orWhere('mahasiswas.id_pencairan', $id_pencairan_aktif)
-            ->groupEnd();
+            ->orWhere('mahasiswas.status_pengajuan !=', 'Proses Pengajuan')
+        ->groupEnd();
 
-        // Menggunakan variabel $perPage agar lebih dinamis
         return $this->paginate($perPage, 'default');
     }
 
