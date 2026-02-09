@@ -335,6 +335,7 @@
                         <th class="text-center">Angkatan</th>
                         <th>Kategori</th>
                         <th class="text-center">Status</th>
+                        <th class="text-center" width="100">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -358,11 +359,18 @@
                                         <?= esc($m['pembaruan_status']) ?>
                                     </span>
                                 </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-bold btn-riwayat" 
+                                            data-id="<?= $m['id'] ?>" data-nim="<?= esc($m['nim']) ?>" data-nama="<?= esc($m['nama']) ?>"
+                                            style="font-size: 0.7rem;">
+                                        <i class="fas fa-history me-1"></i> Riwayat
+                                    </button>
+                                </td>
                             </tr>
                         <?php endforeach ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="fas fa-user-slash fa-3x mb-3 opacity-25"></i>
                                 <p class="mb-0 fw-bold">Mahasiswa tidak ditemukan.</p>
                                 <?php if (!empty($keyword)): ?>
@@ -450,7 +458,7 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0 pb-4 justify-content-center">
-                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold btn-sm shadow-sm" data-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-5 fw-bold btn-sm shadow-sm">Tolak Pengajuan</button>
                     </div>
                 </form>
@@ -458,5 +466,103 @@
         </div>
     </div>
 <?php endif; ?>
+
+<!-- Modal Riwayat Pengajuan -->
+<div class="modal fade" id="modalRiwayat" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+            <div class="modal-header border-0 py-3 px-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h6 class="modal-title fw-bold text-white"><i class="fas fa-history me-2"></i> Riwayat Pengajuan Mahasiswa</h6>
+                <button type="button" class="btn-close btn-close-white" data-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3 p-3 rounded-3" style="background: #f8fafc;">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted fw-bold">NIM</small>
+                            <div class="fw-bold text-primary" id="riwayat-nim">-</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted fw-bold">Nama</small>
+                            <div class="fw-bold" id="riwayat-nama">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="table-riwayat">
+                        <thead>
+                            <tr style="background: #f1f5f9;">
+                                <th class="fw-bold text-muted" style="font-size: 0.75rem;">SEMESTER</th>
+                                <th class="fw-bold text-muted" style="font-size: 0.75rem;">PERIODE</th>
+                                <th class="fw-bold text-muted" style="font-size: 0.75rem;">TAHUN</th>
+                                <th class="fw-bold text-muted text-center" style="font-size: 0.75rem;">STATUS</th>
+                                <th class="fw-bold text-muted" style="font-size: 0.75rem;">TANGGAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayat-body">
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pb-4 justify-content-center">
+                <button type="button" class="btn btn-dark rounded-pill px-5 fw-bold btn-sm shadow-sm" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalRiwayat = new bootstrap.Modal(document.getElementById('modalRiwayat'));
+    
+    document.querySelectorAll('.btn-riwayat').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const idMahasiswa = this.dataset.id;
+            const nim = this.dataset.nim;
+            const nama = this.dataset.nama;
+            
+            // Set info mahasiswa
+            document.getElementById('riwayat-nim').textContent = nim;
+            document.getElementById('riwayat-nama').textContent = nama;
+            
+            // Loading state
+            document.getElementById('riwayat-body').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Memuat data...</td></tr>';
+            
+            // Show modal
+            modalRiwayat.show();
+            
+            // Fetch data
+            fetch(`<?= base_url('admin/mahasiswa/riwayat') ?>/${idMahasiswa}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.riwayat.length > 0) {
+                        let html = '';
+                        data.riwayat.forEach(r => {
+                            const statusClass = r.status_pengajuan === 'Diajukan' ? 'bg-success text-white' : 'bg-warning text-dark';
+                            const tanggal = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'}) : '-';
+                            html += `
+                                <tr>
+                                    <td class="fw-bold">${r.semester || '-'}</td>
+                                    <td>${r.periode || '-'}</td>
+                                    <td>${r.tahun || '-'}</td>
+                                    <td class="text-center"><span class="badge ${statusClass} px-3 py-1" style="font-size: 0.7rem;">${r.status_pengajuan}</span></td>
+                                    <td class="text-muted" style="font-size: 0.8rem;">${tanggal}</td>
+                                </tr>
+                            `;
+                        });
+                        document.getElementById('riwayat-body').innerHTML = html;
+                    } else {
+                        document.getElementById('riwayat-body').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 opacity-25 d-block"></i>Belum ada riwayat pengajuan</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('riwayat-body').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">Gagal memuat data</td></tr>';
+                });
+        });
+    });
+});
+</script>
 
 <?= $this->endSection() ?>

@@ -136,4 +136,21 @@ class PengajuanMahasiswaModel extends Model
             ->set(['status_pengajuan' => $status])
             ->update();
     }
+
+    /**
+     * Ambil riwayat pengajuan mahasiswa dengan detail periode
+     */
+    public function getHistoryWithPeriode($id_mahasiswa)
+    {
+        $db = \Config\Database::connect();
+
+        return $db->table('pengajuan_mahasiswa pm')
+            ->select('pm.id, pm.status_pengajuan, pm.created_at, p.semester, p.periode, p.status as status_pencairan')
+            ->select("YEAR(p.tanggal_entry) as tahun")
+            ->join('pencairans p', 'p.id = pm.id_pencairan')
+            ->where('pm.id_mahasiswa', $id_mahasiswa)
+            ->orderBy('pm.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
 }

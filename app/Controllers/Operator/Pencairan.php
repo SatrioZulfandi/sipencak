@@ -526,4 +526,30 @@ class Pencairan extends BaseController
 
         return redirect()->back()->with('error', 'Tidak dapat membatalkan pengajuan ini.');
     }
+
+    /**
+     * API endpoint untuk mendapatkan riwayat pengajuan mahasiswa
+     */
+    public function riwayatMahasiswa($id_mahasiswa)
+    {
+        $pengajuanModel = new \App\Models\PengajuanMahasiswaModel();
+        $mahasiswaModel = new \App\Models\MahasiswaModel();
+
+        $mahasiswa = $mahasiswaModel->find($id_mahasiswa);
+
+        if (!$mahasiswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Mahasiswa tidak ditemukan']);
+        }
+
+        $riwayat = $pengajuanModel->getHistoryWithPeriode($id_mahasiswa);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'mahasiswa' => [
+                'nim' => $mahasiswa['nim'],
+                'nama' => $mahasiswa['nama']
+            ],
+            'riwayat' => $riwayat
+        ]);
+    }
 }

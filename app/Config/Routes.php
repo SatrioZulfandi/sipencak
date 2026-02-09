@@ -80,6 +80,7 @@ $routes->group('', ['filter' => 'operatorAuth'], function ($routes) {
     $routes->get('laporan-list/(:num)', 'Operator\Pencairan::laporanByPt/$1');
     $routes->get('Operator/pencairan/unduh-laporan', 'Operator\Pencairan::unduhLaporan');
     $routes->get('operator/activity-logs', 'Admin\Log::index'); // Unique URL for Operator
+    $routes->get('operator/mahasiswa/riwayat/(:num)', 'Operator\Pencairan::riwayatMahasiswa/$1');
 });
 
 
@@ -133,6 +134,7 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     $routes->get('admin/laporan-list', 'Admin\Pencairan::laporan');
     $routes->get('admin/laporan-list/(:num)', 'Admin\Pencairan::laporanByPt/$1');
     $routes->get('admin/laporan-detail/(:num)', 'Admin\Pencairan::detail/$1');
+    $routes->get('admin/mahasiswa/riwayat/(:num)', 'Admin\Pencairan::riwayatMahasiswa/$1');
 
     // 2
     $routes->get('verifikasi-mahasiswa/(:num)', 'Admin\Pencairan::verifikasi_mahasiswa/$1');
