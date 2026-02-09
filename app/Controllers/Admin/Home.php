@@ -40,6 +40,14 @@ class Home extends BaseController
         return view('admin/index', $data);
     }
 
+    public function panduan()
+    {
+        $data = [
+            'title' => 'Panduan Admin',
+        ];
+        return view('admin/panduan_admin', $data);
+    }
+
     public function update($id)
     {
         $password = $this->request->getPost('password');

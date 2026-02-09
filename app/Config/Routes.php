@@ -151,4 +151,5 @@ $routes->group('', ['filter' => 'adminAuth'], function ($routes) {
     // Informasi
     $routes->get('papan-informasi', 'Admin\Informasi::index');
     $routes->get('informasi-detail/(:num)', 'Admin\Informasi::show/$1');
+    $routes->get('panduan-admin', 'Admin\Home::panduan');
 });

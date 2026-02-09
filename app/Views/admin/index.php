@@ -239,6 +239,15 @@
                     Panel kendali data mahasiswa penerima bantuan pendidikan di bawah naungan <strong>LLDIKTI Wilayah III Jakarta</strong>.
                 </p>
 
+                <a href="<?= base_url('panduan-admin') ?>" class="btn btn-white text-primary fw-bold rounded-pill px-4 py-2 mt-2 mb-3 shadow-sm hover-scale" style="background: white;">
+                    <i class="fas fa-book-reader me-2"></i> Baca Panduan Penggunaan
+                </a>
+                
+                <style>
+                    .hover-scale { transition: transform 0.2s; }
+                    .hover-scale:hover { transform: scale(1.05); }
+                </style>
+
                 <div class="d-flex flex-wrap gap-2 mt-4">
                     <span class="badge p-2 px-3 fw-600 rounded-pill"
                         style="font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; margin-right: 4px;">
