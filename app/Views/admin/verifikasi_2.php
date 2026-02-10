@@ -522,6 +522,55 @@
     </div>
 </div>
 
+<!-- Modal Konfirmasi Selesai & Ajukan -->
+<div class="modal fade" id="modalSelesaiAjukan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <!-- Header dengan ikon -->
+                <div class="text-center pt-5 pb-3" style="background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);">
+                        <i class="fas fa-paper-plane fa-2x" style="color: #2563eb;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #1e293b;">Selesai & Ajukan?</h5>
+                    <p class="text-muted mb-0 px-4" style="font-size: 0.9rem;">
+                        Data mahasiswa yang dipilih akan diajukan untuk verifikasi lebih lanjut.
+                    </p>
+                </div>
+                
+                <!-- Info Box -->
+                <div class="px-4 py-3">
+                    <div class="p-3 rounded-3" style="background: #f0f9ff; border-left: 4px solid #0ea5e9;">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-info-circle mt-1" style="color: #0369a1;"></i>
+                            <div>
+                                <strong style="color: #075985; font-size: 0.85rem;">Informasi PENTING</strong>
+                                <p class="mb-0 text-muted" style="font-size: 0.8rem;">
+                                    Pastikan data yang dipilih sudah benar. Status mahasiswa akan diperbarui menjadi <strong>"Diajukan"</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tombol Aksi -->
+                <div class="p-4 d-flex gap-2">
+                    <button type="button" class="btn flex-grow-1 fw-bold py-2 btn-close-modal-selesai" 
+                            style="background: #f1f5f9; color: #64748b; border-radius: 12px; cursor: pointer;">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="button" id="btnConfirmSelesai" 
+                       class="btn flex-grow-1 fw-bold py-2 text-center text-decoration-none" 
+                       style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); cursor: pointer; border: none;">
+                        <i class="fas fa-check me-1"></i> Ya, Ajukan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const checkAll = document.getElementById('checkAll');
@@ -534,6 +583,10 @@
             getCheckItems().forEach(cb => cb.checked = this.checked);
         });
 
+        // Modal Instances
+        const modalSelesaiAjukan = new bootstrap.Modal(document.getElementById('modalSelesaiAjukan'));
+        const modalBatalPengajuan = new bootstrap.Modal(document.getElementById('modalBatalPengajuan'));
+
         const handleAction = (isSubmit = false, isCancel = false) => {
             const items = getCheckItems();
             const selected = Array.from(items).filter(cb => cb.checked).map(cb => cb.value);
@@ -544,10 +597,23 @@
                 return;
             }
 
-            if (isCancel && !confirm("Batalkan semua pengajuan di halaman ini?")) return;
-            if (isSubmit && !confirm("Ajukan mahasiswa yang dipilih untuk diproses?")) return;
+            // Logic trigger
+            if (isSubmit) {
+                 modalSelesaiAjukan.show();
+                 return; // Stop here, let the modal confirm button do the rest
+            }
 
-            fetch("<?= base_url('ajukan-mahasiswa') ?>", {
+            if (isCancel) {
+                 modalBatalPengajuan.show();
+                 return;
+            }
+             
+            // Save Draft (Direct Execution)
+            executeAction(selected, all, false); 
+        };
+
+        const executeAction = (selected, all, isCancel) => {
+             fetch("<?= base_url('ajukan-mahasiswa') ?>", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -571,23 +637,32 @@
                     console.error(err);
                     alert("Terjadi kesalahan sistem.");
                 });
-        };
+        }
 
         document.getElementById('btn-save-top').addEventListener('click', () => handleAction(false, false));
         
-        // Modal handling
-        let batalModal = null;
-        document.getElementById('btn-cancel-top').addEventListener('click', () => {
-            batalModal = new bootstrap.Modal(document.getElementById('modalBatalPengajuan'));
-            batalModal.show();
-        });
+        // Modal Batal Handling
+        document.getElementById('btn-cancel-top').addEventListener('click', () => handleAction(false, true));
         document.getElementById('btnCloseModal').addEventListener('click', () => {
-            if (batalModal) {
-                batalModal.hide();
-            }
+            modalBatalPengajuan.hide();
         });
         
+        // Modal Selesai Handling
         document.getElementById('btn-ajukan').addEventListener('click', () => handleAction(true, false));
+        
+        document.getElementById('btnConfirmSelesai').addEventListener('click', () => {
+             const items = getCheckItems();
+             const selected = Array.from(items).filter(cb => cb.checked).map(cb => cb.value);
+             const all = Array.from(items).map(cb => cb.value);
+             
+             executeAction(selected, all, false);
+             modalSelesaiAjukan.hide();
+        });
+
+        document.querySelectorAll('.btn-close-modal-selesai').forEach(btn => {
+            btn.addEventListener('click', () => modalSelesaiAjukan.hide());
+        });
+
 
         document.querySelectorAll('.pembaruan-status').forEach(select => {
             select.addEventListener('change', function() {

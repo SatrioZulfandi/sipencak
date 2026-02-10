@@ -156,12 +156,30 @@ class MahasiswaModel extends Model
      * Digunakan untuk list verifikasi mahasiswa dalam satu pencairan
      * Mengambil data dari tabel pengajuan_mahasiswa
      */
-    public function verifikasi($id_pencairan, $keyword = null)
+    public function verifikasi($id_pencairan, $filters = [])
     {
+        $keyword        = $filters['keyword'] ?? null;
+        $filterProdi    = $filters['filter_prodi'] ?? null;
+        $filterAngkatan = $filters['filter_angkatan'] ?? null;
+        $filterKategori = $filters['filter_kategori'] ?? null;
+        $entries        = $filters['entries'] ?? 10;
+
         $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan')
             ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
             ->join('prodis', 'prodis.id = mahasiswas.id_prodi')
             ->where('pengajuan_mahasiswa.id_pencairan', $id_pencairan);
+
+        if ($filterProdi) {
+            $builder->where('mahasiswas.id_prodi', $filterProdi);
+        }
+
+        if ($filterAngkatan) {
+            $builder->where('mahasiswas.angkatan', $filterAngkatan);
+        }
+
+        if ($filterKategori) {
+            $builder->where('mahasiswas.kategori', $filterKategori);
+        }
 
         if ($keyword) {
             $builder->groupStart()
@@ -170,7 +188,7 @@ class MahasiswaModel extends Model
                 ->groupEnd();
         }
 
-        return $builder->paginate(10, 'default');
+        return $builder->paginate($entries, 'default');
     }
 
     /**

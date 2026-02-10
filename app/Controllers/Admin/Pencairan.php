@@ -745,27 +745,77 @@ class Pencairan extends BaseController
     {
         $mahasiswaModel = new MahasiswaModel();
         $pengajuanModel = new \App\Models\PengajuanMahasiswaModel(); // Use new model for count
+        $prodiModel = new \App\Models\ProdiModel();
         $db = \Config\Database::connect();
 
-        // Ambil keyword dari input search
+        // Ambil ID PT dari session
+        $ptId = session()->get('pt');
+
+        // Ambil filter dari input search
         $keyword = $this->request->getVar('keyword');
+        $filterProdi = $this->request->getVar('filter_prodi');
+        $filterAngkatan = $this->request->getVar('filter_angkatan');
+        $filterKategori = $this->request->getVar('filter_kategori');
+        $entries = $this->request->getVar('entries') ?? 10;
+
+        // Validasi entries
+        if (!in_array($entries, [10, 25, 50, 100])) {
+            $entries = 10;
+        }
 
         $pt = $db->table('pts')
-            ->where('id', session()->get('pt'))
+            ->where('id', $ptId)
             ->get()
             ->getRowArray();
 
-        // Hitung dari tabel pengajuan_mahasiswa
+        // Hitung dari tabel pengajuan_mahasiswa (Total keseluruhan di batch ini)
         $jumlahTotal = $pengajuanModel->where('id_pencairan', $id)->countAllResults();
 
+        // Filters Array
+        $filters = [
+            'keyword' => $keyword,
+            'filter_prodi' => $filterProdi,
+            'filter_angkatan' => $filterAngkatan,
+            'filter_kategori' => $filterKategori,
+            'entries' => $entries
+        ];
+
+        // Retrieve Data Lists for Dropdowns (Sama seperti step 2)
+        $listProdi = $prodiModel->where('id_pt', $ptId)->findAll();
+        
+        $listAngkatan = $db->table('mahasiswas')
+                            ->select('angkatan')
+                            ->distinct()
+                            ->where('id_pt', $ptId)
+                            ->orderBy('angkatan', 'DESC')
+                            ->get()
+                            ->getResultArray();
+
+        $listKategori = $db->table('mahasiswas')
+                            ->select('kategori')
+                            ->distinct()
+                            ->where('id_pt', $ptId)
+                            ->where('kategori !=', '')
+                            ->where('kategori IS NOT NULL')
+                            ->orderBy('kategori', 'ASC')
+                            ->get()
+                            ->getResultArray();
+
         $data = [
-            'mahasiswa'    => $mahasiswaModel->verifikasi($id, $keyword),
-            'title'        => 'Finalisasi Verifikasi',
-            'id_pencairan' => $id,
-            'pager'        => $mahasiswaModel->pager,
-            'jumlah'       => $jumlahTotal,
-            'pt'           => $pt,
-            'keyword'      => $keyword
+            'mahasiswa'       => $mahasiswaModel->verifikasi($id, $filters),
+            'title'           => 'Finalisasi Verifikasi',
+            'id_pencairan'    => $id,
+            'pager'           => $mahasiswaModel->pager,
+            'jumlah'          => $jumlahTotal,
+            'pt'              => $pt,
+            'keyword'         => $keyword,
+            'filter_prodi'    => $filterProdi,
+            'filter_angkatan' => $filterAngkatan,
+            'filter_kategori' => $filterKategori,
+            'entries'         => $entries,
+            'list_prodi'      => $listProdi,
+            'list_angkatan'   => $listAngkatan,
+            'list_kategori'   => $listKategori
         ];
 
         return view('admin/verifikasi_3', $data);

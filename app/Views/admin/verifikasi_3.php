@@ -235,13 +235,94 @@
                     <a href="<?= base_url('export-mahasiswa/' . $id_pencairan) ?>" class="btn-elite btn-elite-success">
                         <i class="fas fa-file-excel"></i> Export Excel
                     </a>
-                    <form action="" method="get" class="search-wrapper">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="keyword" value="<?= esc($keyword ?? '') ?>"
-                            class="search-input-elite" placeholder="Cari Nama atau NIM...">
-                    </form>
                 </div>
             </div>
+
+            <!-- Filter Section -->
+            <form action="" method="get" class="w-100 mb-4">
+                <div class="row g-2 align-items-end">
+                    <!-- Search Input -->
+                    <div class="col-12 col-md-3">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Cari Data</label>
+                        <div class="search-container position-relative w-100">
+                            <input type="text" name="keyword" class="form-control form-control-sm border shadow-sm ps-5 bg-white w-100"
+                                placeholder="Cari NIM / Nama..."
+                                style="padding-left: 2.5rem !important; color: #64748b; border-radius: 12px; border-color: #e2e8f0;"
+                                value="<?= esc($keyword ?? '') ?>">
+                            <i class="fas fa-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; z-index: 5;"></i>
+
+                            <?php if (!empty($keyword)): ?>
+                                <a href="<?= current_url() ?>" class="text-decoration-none position-absolute text-muted" style="right: 1rem; top: 50%; transform: translateY(-50%); z-index: 5;" title="Bersihkan">
+                                    <i class="fas fa-times-circle"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Filter Entries -->
+                    <div class="col-6 col-md-auto">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Jumlah</label>
+                        <select name="entries" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="font-weight: 500; color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <?php foreach([10, 25, 50, 100] as $val): ?>
+                                <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filter Prodi -->
+                    <div class="col-6 col-md-3">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Program Studi</label>
+                        <select name="filter_prodi" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <option value="">Semua Prodi</option>
+                            <?php if (!empty($list_prodi)): ?>
+                                <?php foreach($list_prodi as $lp): ?>
+                                    <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
+                                        <?= esc($lp['nama_prodi']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filter Angkatan -->
+                    <div class="col-6 col-md-2">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Angkatan</label>
+                        <select name="filter_angkatan" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <option value="">Semua</option>
+                            <?php if (!empty($list_angkatan)): ?>
+                                <?php foreach($list_angkatan as $la): ?>
+                                    <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
+                                        <?= esc($la['angkatan']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Filter Kategori -->
+                    <div class="col-12 col-md">
+                            <label class="text-uppercase fw-bold text-muted small mb-1">Kategori</label>
+                            <select name="filter_kategori" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <option value="">Semua</option>
+                            <?php if (!empty($list_kategori)): ?>
+                                <?php foreach($list_kategori as $cat): ?>
+                                    <option value="<?= $cat['kategori'] ?>" <?= ($filter_kategori == $cat['kategori']) ? 'selected' : '' ?>>
+                                        <?= esc($cat['kategori']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+            </form>
 
             <div class="table-responsive-elite">
                 <table class="table-elite">
@@ -314,15 +395,78 @@
                         <i class="fas fa-file-invoice"></i> Simpan ke Draft
                     </a>
 
-                    <a href="<?= base_url('verifikasi-final/' . $id_pencairan) ?>"
+                    <button type="button" 
                         class="btn-elite btn-elite-primary shadow-sm"
-                        onclick="return confirm('Apakah Anda yakin data sudah valid? Tindakan ini tidak dapat dibatalkan.')">
+                        id="btnKirimVerifikasi">
                         Kirim Hasil Verifikasi <i class="fas fa-paper-plane ms-2"></i>
-                    </a>
+                    </button>
                 </div>
             </footer>
         </div>
     </div>
 </div>
+
+<!-- Modal Konfirmasi Finalisasi -->
+<div class="modal fade" id="modalKonfirmasiFinal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <!-- Header -->
+                <div class="text-center pt-5 pb-3" style="background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 80px; height: 80px; background: #fff; border-radius: 50%; box-shadow: 0 8px 20px rgba(34, 197, 94, 0.2);">
+                        <i class="fas fa-check-circle fa-2x" style="color: #16a34a;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="color: #1e293b;">Finalisasi Verifikasi?</h5>
+                    <p class="text-muted mb-0 px-4" style="font-size: 0.9rem;">
+                        Data akan dikunci dan siap untuk proses pencairan.
+                    </p>
+                </div>
+                
+                <!-- Info Box -->
+                <div class="px-4 py-3">
+                    <div class="p-3 rounded-3" style="background: #fff7ed; border-left: 4px solid #f97316;">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-exclamation-triangle mt-1" style="color: #c2410c;"></i>
+                            <div>
+                                <strong style="color: #9a3412; font-size: 0.85rem;">Perhatian!</strong>
+                                <p class="mb-0 text-muted" style="font-size: 0.8rem;">
+                                    Tindakan ini <strong>tidak dapat dibatalkan</strong>. Pastikan seluruh data mahasiswa telah valid sesuai ketentuan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tombol Aksi -->
+                <div class="p-4 d-flex gap-2">
+                    <button type="button" class="btn flex-grow-1 fw-bold py-2 btn-close-modal" 
+                            style="background: #f1f5f9; color: #64748b; border-radius: 12px; cursor: pointer;">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <a href="<?= base_url('verifikasi-final/' . $id_pencairan) ?>" 
+                       class="btn flex-grow-1 fw-bold py-2 text-center text-decoration-none" 
+                       style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); cursor: pointer;">
+                        <i class="fas fa-paper-plane me-1"></i> Ya, Kirim
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalKonfirmasi = new bootstrap.Modal(document.getElementById('modalKonfirmasiFinal'));
+        
+        document.getElementById('btnKirimVerifikasi').addEventListener('click', function() {
+            modalKonfirmasi.show();
+        });
+
+        document.querySelectorAll('.btn-close-modal').forEach(btn => {
+            btn.addEventListener('click', () => modalKonfirmasi.hide());
+        });
+    });
+</script>
 
 <?= $this->endSection() ?>
