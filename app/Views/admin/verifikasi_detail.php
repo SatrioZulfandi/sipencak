@@ -347,12 +347,12 @@
                         <?php if (!empty($data[$key])): ?>
                             <a href="<?= base_url('file/' . $data[$key]) ?>" target="_blank" class="btn-file-elite">
                                 <span class="text-truncate"><?= $label ?></span>
-                                <i class="fas fa-external-link-alt small opacity-50 ms-2"></i>
+                                <i class="fas fa-download text-primary ms-2"></i>
                             </a>
                         <?php else: ?>
                             <div class="btn-file-elite opacity-50 bg-light">
                                 <span><?= $label ?></span>
-                                <i class="fas fa-times small ms-2"></i>
+                                <i class="fas fa-times text-danger ms-2"></i>
                             </div>
                         <?php endif; ?>
                     </div>
