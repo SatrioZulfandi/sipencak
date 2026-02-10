@@ -97,15 +97,20 @@
 
     /* --- ACTION BUTTONS --- */
     .btn-action {
-        width: 32px;
+        min-width: 32px;
         height: 32px;
+        padding: 0 10px;
         display: inline-flex;
+        gap: 6px;
         align-items: center;
         justify-content: center;
         border-radius: 8px;
         transition: 0.2s;
         border: 1px solid var(--border);
         background: white;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-decoration: none;
     }
 
     .btn-action:hover {
@@ -275,8 +280,12 @@
                                             <a href="<?= ($item['status'] === 'Ajukan Mahasiswa') ? "/verifikasi-mahasiswa/{$item['id']}" : "/finalisasi-verifikasi/{$item['id']}" ?>" class="btn btn-success btn-continue">
                                                 LANJUTKAN <i class="fas fa-arrow-right"></i>
                                             </a>
-                                            <a href="/verifikasi-edit/<?= $item['id'] ?>" class="btn-action btn-edit" title="Edit"><i class="fas fa-pencil-alt"></i></a>
-                                            <a href="/verifikasi-delete/<?= $item['id'] ?>" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus draft ini?')"><i class="fas fa-trash-alt"></i></a>
+                                            <a href="/verifikasi-edit/<?= $item['id'] ?>" class="btn-action btn-edit" title="Edit">
+                                                <i class="fas fa-pencil-alt"></i> <span class="d-none d-md-inline">Edit</span>
+                                            </a>
+                                            <a href="/verifikasi-delete/<?= $item['id'] ?>" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus draft ini?')">
+                                                <i class="fas fa-trash-alt"></i> <span class="d-none d-md-inline">Hapus</span>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

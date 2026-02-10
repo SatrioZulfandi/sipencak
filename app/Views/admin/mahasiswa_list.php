@@ -50,15 +50,18 @@
     }
 
     .action-wrapper {
-        width: 34px;
+        min-width: 34px;
         height: 34px;
+        padding: 0 10px;
         background: white;
         border: 1px solid var(--border-color);
         border-radius: 10px;
         display: flex;
+        gap: 6px;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        font-weight: 600;
         transition: all 0.2s ease;
     }
 
@@ -512,6 +515,7 @@
                                             title="Lihat Detail">
                                             <div class="action-wrapper">
                                                 <i class="fas fa-eye"></i>
+                                                <span class="d-none d-md-inline">Detail</span>
                                             </div>
                                         </a>
 
@@ -520,6 +524,7 @@
                                             title="Edit Data">
                                             <div class="action-wrapper">
                                                 <i class="fas fa-edit"></i>
+                                                <span class="d-none d-md-inline">Edit</span>
                                             </div>
                                         </a>
 
@@ -529,6 +534,7 @@
                                             title="Hapus">
                                             <div class="action-wrapper">
                                                 <i class="fas fa-trash"></i>
+                                                <span class="d-none d-md-inline">Hapus</span>
                                             </div>
                                         </button>
                                     </div>

@@ -397,8 +397,8 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <a href="/verifikasi-detail/<?= $item['id'] ?>" class="btn btn-sm btn-light border py-2 px-3 text-primary" title="Detail">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="/verifikasi-detail/<?= $item['id'] ?>" class="btn btn-sm btn-light border py-2 px-3 text-primary d-flex align-items-center gap-2 justify-content-center" title="Detail">
+                                        <i class="fas fa-eye"></i> <span class="d-none d-md-inline">Detail</span>
                                     </a>
                                 </td>
                             </tr>

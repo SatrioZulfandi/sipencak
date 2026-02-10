@@ -94,15 +94,18 @@
     }
 
     .action-wrapper {
-        width: 36px;
+        min-width: 36px;
         height: 36px;
+        padding: 0 10px;
         background: #ffffff;
         border: 1px solid var(--border-color);
         border-radius: 10px;
         display: flex;
+        gap: 6px;
         align-items: center;
         justify-content: center;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 600;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         color: var(--text-muted);
     }
@@ -405,10 +408,16 @@
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
                                         <a href="prodi-edit/<?= $row['id'] ?>" class="btn-elite-action text-warning" title="Edit">
-                                            <div class="action-wrapper"><i class="fas fa-edit"></i></div>
+                                            <div class="action-wrapper">
+                                                <i class="fas fa-edit"></i>
+                                                <span class="d-none d-md-inline">Edit</span>
+                                            </div>
                                         </a>
                                         <a href="prodi-delete/<?= $row['id'] ?>" class="btn-elite-action text-danger" onclick="return confirm('Hapus data ini?')" title="Hapus">
-                                            <div class="action-wrapper"><i class="fas fa-trash"></i></div>
+                                            <div class="action-wrapper">
+                                                <i class="fas fa-trash"></i>
+                                                <span class="d-none d-md-inline">Hapus</span>
+                                            </div>
                                         </a>
                                     </div>
                                 </td>
