@@ -564,7 +564,15 @@
                                 <td class="text-center"><?= esc($m['angkatan']) ?></td>
                                 <td><span class="badge bg-light text-dark border-0 py-1 px-2" style="font-size: 9px; font-weight: 800;"><?= esc($m['kategori']) ?></span></td>
                                 <td class="text-center">
-                                    <span class="badge bg-primary-subtle text-primary border-0 fw-bold" style="font-size: 10px; background: #eff6ff;">
+                                    <?php
+                                    $badgeClass = 'bg-primary-subtle text-primary'; // Default
+                                    if ($m['pembaruan_status'] == 'Tetap') {
+                                        $badgeClass = 'bg-success-subtle text-success';
+                                    } elseif ($m['pembaruan_status'] == 'Henti') {
+                                        $badgeClass = 'bg-danger-subtle text-danger';
+                                    }
+                                    ?>
+                                    <span class="badge <?= $badgeClass ?> border-0 fw-bold" style="font-size: 10px;">
                                         <?= esc($m['pembaruan_status']) ?>
                                     </span>
                                 </td>

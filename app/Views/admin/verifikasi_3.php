@@ -442,7 +442,17 @@
                                     <td class="text-center"><?= esc($mhs['jenjang']) ?></td>
                                     <td class="text-center"><?= esc($mhs['angkatan']) ?></td>
                                     <td><span class="text-uppercase" style="font-size: 0.7rem; font-weight: 600;"><?= esc($mhs['kategori']) ?></span></td>
-                                    <td class="text-center"><span class="status-badge"><?= esc($mhs['pembaruan_status']) ?></span></td>
+                                    <td class="text-center">
+                                        <?php
+                                        $badgeClass = 'badge bg-primary-subtle text-primary'; // Default
+                                        if ($mhs['pembaruan_status'] == 'Tetap') {
+                                            $badgeClass = 'badge bg-success-subtle text-success'; 
+                                        } elseif ($mhs['pembaruan_status'] == 'Henti') {
+                                            $badgeClass = 'badge bg-danger-subtle text-danger';
+                                        }
+                                        ?>
+                                        <span class="<?= $badgeClass ?> border-0" style="font-size: 0.75rem;"><?= esc($mhs['pembaruan_status']) ?></span>
+                                    </td>
                                 </tr>
                             <?php endforeach ?>
                         <?php else: ?>

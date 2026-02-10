@@ -297,6 +297,18 @@
         background: #dbeafe; /* Lighter primary */
         color: var(--primary);
     }
+    /* --- STATUS DROPDOWN COLORS --- */
+    .select-status-tetap {
+        background-color: #dcfce7 !important; /* Green bg */
+        color: #166534 !important; /* Green text */
+        border-color: #bbf7d0 !important;
+    }
+    
+    .select-status-henti {
+        background-color: #fee2e2 !important; /* Red bg */
+        color: #991b1b !important; /* Red text */
+        border-color: #fecaca !important;
+    }
 </style>
 
 <div class="container-fluid px-4 py-4 fade-in-up">
@@ -512,7 +524,11 @@
                                 <td class="text-center"><?= esc($mhs['angkatan']) ?></td>
                                 <td><small class="fw-medium"><?= esc($mhs['kategori']) ?></small></td>
                                 <td>
-                                    <select class="select-elite pembaruan-status w-100" data-id="<?= $mhs['id'] ?>">
+                                    <?php
+                                        // Tentukan kelas warna awal
+                                        $statusClass = ($mhs['pembaruan_status'] == 'Henti') ? 'select-status-henti' : 'select-status-tetap';
+                                    ?>
+                                    <select class="select-elite pembaruan-status w-100 <?= $statusClass ?>" data-id="<?= $mhs['id'] ?>">
                                         <option value="Tetap" <?= $mhs['pembaruan_status'] == 'Tetap' ? 'selected' : '' ?>>Tetap</option>
                                         <option value="Henti" <?= $mhs['pembaruan_status'] == 'Henti' ? 'selected' : '' ?>>Henti</option>
                                     </select>
@@ -743,6 +759,16 @@
 
         document.querySelectorAll('.pembaruan-status').forEach(select => {
             select.addEventListener('change', function() {
+                // Update Color Class
+                if (this.value === 'Henti') {
+                    this.classList.remove('select-status-tetap');
+                    this.classList.add('select-status-henti');
+                } else {
+                    this.classList.remove('select-status-henti');
+                    this.classList.add('select-status-tetap');
+                }
+
+                // Call API
                 fetch("<?= base_url('mahasiswa/updateStatus') ?>", {
                         method: 'POST',
                         headers: {
