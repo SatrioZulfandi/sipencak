@@ -282,14 +282,21 @@ class Pencairan extends BaseController
 
         // Simpan ke database
         $model = new PencairanModel();
+        
+        // Fix Logic Periode: Ambil dari Semester + Tahun sekarang (atau tahun input jika ada)
+        // Format yang diinginkan: "Semester Ganjil" atau "Semester Genap" (sesuai existing database)
+        // Kita abaikan input 'periode' dari form yang hardcoded ID 1
+        $semesterInput = $this->request->getPost('semester');
+        $periodeFixed = 'Semester ' . $semesterInput; // Hasil: "Semester Ganjil" atau "Semester Genap"
+
         $model->save([
             'id_pt' => $this->request->getPost('id_pt'),
-            'periode' => $this->request->getPost('periode'),
+            'periode' => $periodeFixed, // Gunakan fixed logic
             'kategori_penerima' => $this->request->getPost('kategori_penerima'),
             'tanggal_entry' => date('Y-m-d'),
             'no_sk' => $this->request->getPost('no_surat_permohonan'),
             'tanggal' => $this->request->getPost('tanggal'), // Ambil dari input form, bukan date('Y-m-d')
-            'semester' => $this->request->getPost('semester'),
+            'semester' => $semesterInput,
             'sptjm' => $newsptjm,
             'sk_penetapan' => $newSk_penetapan,
             'sk_pembatalan' => $newSk_pembatalan,
@@ -512,12 +519,18 @@ class Pencairan extends BaseController
             $newBerita_acara = $dataLama['berita_acara'];
         }
 
+        // Fix Logic Periode Update
+        $semesterInput = $this->request->getPost('semester');
+        $periodeFixed = 'Semester ' . $semesterInput;
+
         // Simpan ke database
         $model->update($id, [
+            'id_pt' => $this->request->getPost('id_pt'), // Pastikan ID PT tetap/terupdate jika perlu
+            'periode' => $periodeFixed, // Use fixed periode
             'kategori_penerima' => $this->request->getPost('kategori_penerima'),
             'no_sk' => $this->request->getPost('no_surat_permohonan'),
             'tanggal' => $this->request->getPost('tanggal'), // Ambil dari input form
-            'semester' => $this->request->getPost('semester'),
+            'semester' => $semesterInput,
             'sptjm' => $newsptjm,
             'sk_penetapan' => $newSk_penetapan,
             'sk_pembatalan' => $newSk_pembatalan,
@@ -554,7 +567,14 @@ class Pencairan extends BaseController
             $mahasiswaModel->where('mahasiswas.status_pengajuan', 'Diajukan');
         }
 
-        $listMahasiswa = $mahasiswaModel->universitas($pt, $id, 10);
+        // Ambil jumlah entries per halaman, default 10
+        $entries = $this->request->getGet('entries') ?? 10;
+        $validEntries = [10, 25, 50, 100];
+        if (!in_array($entries, $validEntries)) {
+            $entries = 10;
+        }
+
+        $listMahasiswa = $mahasiswaModel->universitas($pt, $id, $entries);
 
         $data = [
             'title'         => 'Ajukan Mahasiswa',
@@ -562,7 +582,8 @@ class Pencairan extends BaseController
             'mahasiswa'     => $listMahasiswa,
             'pager'         => $mahasiswaModel->pager,
             'keyword'       => $keyword,
-            'status_filter' => $statusFilter
+            'status_filter' => $statusFilter,
+            'entries'       => $entries // Kirim info entries ke view
         ];
 
         return view('admin/verifikasi_2', $data);
@@ -866,7 +887,7 @@ class Pencairan extends BaseController
             'jumlah'    => $mahasiswaModel->where('id_pencairan', $id)->countAllResults()
         ];
 
-        return view('Admin/verifikasi_detail', $dataView);
+        return view('admin/verifikasi_detail', $dataView);
     }
     public function ditolak($id)
     {

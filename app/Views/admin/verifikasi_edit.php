@@ -279,7 +279,6 @@
                 </div>
 
                 <input type="hidden" name="id_pt" value="<?= old('id_pt', $data['id_pt'] ?? session()->get('pt')) ?>">
-                <input type="hidden" name="periode" value="<?= old('periode', $data['periode'] ?? $periode['periode']) ?>">
             </div>
 
             <div class="action-bar">

@@ -58,15 +58,23 @@ class Mahasiswa extends BaseController
                             ->get()
                             ->getResultArray();
 
+        // Ambil jumlah entries per halaman, default 10
+        $entries = $this->request->getGet('entries') ?? 10;
+        $validEntries = [10, 25, 50, 100];
+        if (!in_array($entries, $validEntries)) {
+            $entries = 10;
+        }
+
         $data = [
-            'data'    => $model->paginate(10, 'default'),
+            'data'    => $model->paginate($entries, 'default'),
             'pager'   => $model->pager,
             'title'   => 'Manajemen Mahasiswa',
             'keyword' => $keyword,
             'filter_prodi' => $filterProdi,
             'filter_angkatan' => $filterAngkatan,
             'list_prodi' => $listProdi,
-            'list_angkatan' => $queryAngkatan
+            'list_angkatan' => $queryAngkatan,
+            'entries' => $entries // Kirim ke view
         ];
 
         return view('admin/mahasiswa_list', $data);

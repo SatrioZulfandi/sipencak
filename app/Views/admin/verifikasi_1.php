@@ -285,7 +285,6 @@
                 </div>
 
                 <input type="hidden" name="id_pt" value="<?= session()->get('pt') ?>">
-                <input type="hidden" name="periode" value="<?= $periode['periode'] ?>">
 
                 <div class="d-none">
                     <input type="radio" name="periode_hidden" value="Semester Ganjil" <?= ($selectedPeriode == 'Semester Ganjil') ? 'checked' : '' ?>>

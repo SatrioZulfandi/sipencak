@@ -20,7 +20,7 @@
                     
                     <!-- KONTEN PANDUAN -->
                     <div class="guide-content">
-                        <h2 class="h4 fw-bold text-primary mb-4">🎯 TENTANG SIPENCAK</h2>
+                        <h2 class="h4 fw-bold text-primary mb-4"> TENTANG SIPENCAK</h2>
                         <p><strong>SIPENCAK</strong> adalah <strong>Sistem Informasi Pencairan KIP-K</strong> yang dikelola oleh LLDIKTI Wilayah III Jakarta. Sistem ini digunakan untuk:</p>
                         <ul class="mb-4">
                             <li>Mengelola data mahasiswa penerima beasiswa KIP-K</li>

@@ -266,8 +266,34 @@
 
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-md-end gap-2 flex-wrap">
+            <!-- Filter Entries -->
+            <form action="" method="get" class="d-flex gap-2 align-items-center me-auto">
+                <span class="text-muted fw-bold" style="font-size: 0.8rem;">Show</span>
+                <select name="entries" class="filter-select-elite" onchange="this.form.submit()" style="
+                        padding: 0.4rem 0.8rem;
+                        border-radius: 8px;
+                        border: 2px solid var(--border-color);
+                        background: #fff;
+                        font-weight: 700;
+                        font-size: 0.8rem;
+                        color: var(--text-dark);
+                        cursor: pointer;
+                        min-width: 70px;
+                    ">
+                    <?php foreach([10, 25, 50, 100] as $val): ?>
+                        <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="text-muted fw-bold" style="font-size: 0.8rem;">entries</span>
+                
+                <!-- Preserve other filters -->
+                <input type="hidden" name="keyword" value="<?= esc($keyword ?? '') ?>">
+                <input type="hidden" name="status_filter" value="<?= esc($status_filter ?? '') ?>">
+            </form>
+
             <!-- Filter Status -->
             <form action="" method="get" class="d-flex gap-2 align-items-center">
+                <input type="hidden" name="entries" value="<?= esc($entries ?? 10) ?>">
                 <div class="filter-dropdown-wrapper" style="position: relative;">
                     <i class="fas fa-filter" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.75rem; z-index: 1;"></i>
                     <select name="status_filter" class="filter-select-elite" onchange="this.form.submit()" style="
@@ -303,6 +329,7 @@
                     value="<?= esc($keyword ?? '') ?>">
                 <i class="fas fa-search search-icon"></i>
                 <input type="hidden" name="status_filter" value="<?= esc($status_filter ?? '') ?>">
+                <input type="hidden" name="entries" value="<?= esc($entries ?? 10) ?>">
 
                 <?php if (!empty($keyword)): ?>
                     <a href="<?= base_url('verifikasi-mahasiswa/' . $id_pencairan) ?>" class="clear-search" title="Reset">

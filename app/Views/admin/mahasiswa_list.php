@@ -402,45 +402,72 @@
         </div>
     <?php endif; ?>
 
-    <div class="row mb-3">
-        <div class="col-12">
-            <form action="" method="get" class="d-flex flex-wrap gap-2 justify-content-md-end">
-                <!-- Filter Prodi -->
-                <select name="filter_prodi" class="form-select border-0 shadow-sm" style="width: 200px; border-radius: 12px; font-size: 0.85rem;" onchange="this.form.submit()">
-                    <option value="">Semua Prodi</option>
-                    <?php if (!empty($list_prodi)): ?>
-                        <?php foreach($list_prodi as $lp): ?>
-                            <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
-                                <?= esc($lp['nama_prodi']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
+    <div class="card card-elite mb-4 border-0 shadow-sm" style="background: #f8fafc; border-radius: 20px;">
+        <div class="card-body p-4">
+             <form action="" method="get">
+                <div class="row g-3 align-items-center">
+                    <!-- Filter Entries (Left) -->
+                    <div class="col-12 col-md-auto">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-muted fw-bold small text-nowrap">Show</span>
+                            <select name="entries" class="form-select form-select-sm border-0 shadow-sm bg-white" style="width: auto; font-weight: 600;" onchange="this.form.submit()">
+                                <?php foreach([10, 25, 50, 100] as $val): ?>
+                                    <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <span class="text-muted fw-bold small text-nowrap">entries</span>
+                        </div>
+                    </div>
 
-                <!-- Filter Angkatan -->
-                <select name="filter_angkatan" class="form-select border-0 shadow-sm" style="width: 150px; border-radius: 12px; font-size: 0.85rem;" onchange="this.form.submit()">
-                    <option value="">Semua Angkatan</option>
-                    <?php if (!empty($list_angkatan)): ?>
-                        <?php foreach($list_angkatan as $la): ?>
-                            <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
-                                <?= esc($la['angkatan']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
+                    <!-- Main Filters (Right) - Expands to fill width -->
+                    <div class="col-12 col-md">
+                        <div class="row g-3">
+                            <!-- Filter Prodi -->
+                            <div class="col-12 col-md-4">
+                                <select name="filter_prodi" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" onchange="this.form.submit()">
+                                    <option value="">Semua Prodi</option>
+                                    <?php if (!empty($list_prodi)): ?>
+                                        <?php foreach($list_prodi as $lp): ?>
+                                            <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
+                                                <?= esc($lp['nama_prodi']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
 
-                <!-- Search Input -->
-                <div class="search-container" style="max-width: 300px;">
-                    <input type="text" name="keyword" class="search-input-elite"
-                        placeholder="Cari NIM / Nama..."
-                        value="<?= esc($keyword ?? '') ?>">
-                    <i class="fas fa-search search-icon"></i>
+                            <!-- Filter Angkatan -->
+                            <div class="col-12 col-md-3">
+                                <select name="filter_angkatan" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" onchange="this.form.submit()">
+                                    <option value="">Semua Angkatan</option>
+                                    <?php if (!empty($list_angkatan)): ?>
+                                        <?php foreach($list_angkatan as $la): ?>
+                                            <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
+                                                <?= esc($la['angkatan']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
 
-                    <?php if (!empty($keyword)): ?>
-                        <a href="<?= base_url('mahasiswa-list') ?>" class="clear-search" title="Bersihkan Pencarian">
-                            <i class="fas fa-times-circle"></i>
-                        </a>
-                    <?php endif; ?>
+                            <!-- Search Input -->
+                            <div class="col-12 col-md">
+                                <div class="search-container position-relative w-100">
+                                    <input type="text" name="keyword" class="form-control form-control-sm border-0 shadow-sm ps-5 bg-white w-100"
+                                        placeholder="Cari NIM / Nama..."
+                                        style="padding-left: 2.5rem !important;"
+                                        value="<?= esc($keyword ?? '') ?>">
+                                    <i class="fas fa-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; z-index: 5;"></i>
+
+                                    <?php if (!empty($keyword)): ?>
+                                        <a href="<?= base_url('mahasiswa-list') ?>" class="text-decoration-none position-absolute text-muted" style="right: 1rem; top: 50%; transform: translateY(-50%); z-index: 5;" title="Bersihkan">
+                                            <i class="fas fa-times-circle"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -464,9 +491,9 @@
                 <tbody>
                     <?php if (!empty($data)): ?>
                         <?php
-                        // Logika penomoran dinamis sesuai konfigurasi Pager Anda (perPage = 6)
+                        // Logika penomoran dinamis sesuai konfigurasi Pager Anda
                         $currentPage = $pager->getCurrentPage('default');
-                        $perPage = 10;
+                        $perPage = $entries ?? 10;
                         $no = ($currentPage - 1) * $perPage + 1;
                         ?>
                         <?php foreach ($data as $row): ?>
