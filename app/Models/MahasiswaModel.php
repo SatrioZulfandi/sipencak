@@ -72,10 +72,16 @@ class MahasiswaModel extends Model
      * PERBAIKAN: Logika per-semester untuk pengajuan KIP.
      * Menggunakan tabel pengajuan_mahasiswa untuk tracking multi-periode.
      */
-    public function universitas($pt, $id_pencairan_aktif = null, $perPage = 10)
+    public function universitas($pt, $id_pencairan_aktif = null, $filters = [])
     {
         $db = \Config\Database::connect();
         
+        $perPage        = $filters['entries'] ?? 10;
+        $filterProdi    = $filters['filter_prodi'] ?? null;
+        $filterAngkatan = $filters['filter_angkatan'] ?? null;
+        $filterKategori = $filters['filter_kategori'] ?? null;
+        $keyword        = $filters['keyword'] ?? null;
+
         // Ambil info semester dari pencairan yang sedang aktif
         $pencairanModel = new \App\Models\PencairanModel();
         $pencairanAktif = $pencairanModel->find($id_pencairan_aktif);
@@ -121,6 +127,23 @@ class MahasiswaModel extends Model
             ->join('pengajuan_mahasiswa pm_aktif', 'pm_aktif.id_mahasiswa = mahasiswas.id AND pm_aktif.id_pencairan = ' . $db->escape($id_pencairan_aktif), 'left')
             ->where('mahasiswas.id_pt', $pt);
         
+        // Filter Logic
+        if ($filterProdi) {
+            $builder->where('mahasiswas.id_prodi', $filterProdi);
+        }
+        if ($filterAngkatan) {
+            $builder->where('mahasiswas.angkatan', $filterAngkatan);
+        }
+        if ($filterKategori) {
+            $builder->where('mahasiswas.kategori', $filterKategori);
+        }
+        if ($keyword) {
+            $builder->groupStart()
+                ->like('mahasiswas.nama', $keyword)
+                ->orLike('mahasiswas.nim', $keyword)
+                ->groupEnd();
+        }
+
         // Kecualikan yang sudah FINAL atau Draft Lain
         if (!empty($excludedIds)) {
             $builder->whereNotIn('mahasiswas.id', $excludedIds);
@@ -153,7 +176,7 @@ class MahasiswaModel extends Model
     /**
      * Digunakan untuk halaman detail pencairan (lengkap dengan data PT)
      */
-    public function pencairan($id_pencairan, $keyword = null)
+    public function pencairan($id_pencairan, $keyword = null, $prodi = null, $angkatan = null, $entries = 10)
     {
         $this->select('mahasiswas.*, pts.perguruan_tinggi, pts.kode_pt, prodis.kode_prodi, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan, pengajuan_mahasiswa.id as id_pengajuan')
             ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
@@ -169,7 +192,15 @@ class MahasiswaModel extends Model
                 ->groupEnd();
         }
 
-        // Tetap gunakan pagination 6 data per halaman sesuai preferensi Anda
-        return $this->paginate(6, 'default');
+        if (!empty($prodi)) {
+            $this->where('mahasiswas.id_prodi', $prodi);
+        }
+
+        if (!empty($angkatan)) {
+            $this->where('mahasiswas.angkatan', $angkatan);
+        }
+
+        // Tetap gunakan pagination sesuai preferensi Anda
+        return $this->paginate($entries, 'default');
     }
 }

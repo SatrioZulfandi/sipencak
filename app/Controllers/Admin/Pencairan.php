@@ -547,25 +547,13 @@ class Pencairan extends BaseController
     {
         $pt = session()->get('pt');
         $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $prodiModel = new \App\Models\ProdiModel();
 
-        // Ambil keyword pencarian dan status filter
+        // Ambil filter dari request
         $keyword = $this->request->getGet('keyword');
-        $statusFilter = $this->request->getGet('status_filter');
-
-        // Filter berdasarkan keyword
-        if ($keyword) {
-            $mahasiswaModel->groupStart()
-                ->like('mahasiswas.nama', $keyword)
-                ->orLike('mahasiswas.nim', $keyword)
-                ->groupEnd();
-        }
-        
-        // Filter berdasarkan status pengajuan
-        if ($statusFilter === 'belum') {
-            $mahasiswaModel->where('mahasiswas.status_pengajuan', 'Belum Diajukan');
-        } elseif ($statusFilter === 'diajukan') {
-            $mahasiswaModel->where('mahasiswas.status_pengajuan', 'Diajukan');
-        }
+        $filterProdi = $this->request->getGet('filter_prodi');
+        $filterAngkatan = $this->request->getGet('filter_angkatan');
+        $filterKategori = $this->request->getGet('filter_kategori');
 
         // Ambil jumlah entries per halaman, default 10
         $entries = $this->request->getGet('entries') ?? 10;
@@ -574,16 +562,53 @@ class Pencairan extends BaseController
             $entries = 10;
         }
 
-        $listMahasiswa = $mahasiswaModel->universitas($pt, $id, $entries);
+        // Prepare filters for model
+        $filters = [
+            'keyword' => $keyword,
+            'filter_prodi' => $filterProdi,
+            'filter_angkatan' => $filterAngkatan,
+            'filter_kategori' => $filterKategori,
+            'entries' => $entries
+        ];
+
+        // Fetch data
+        $listMahasiswa = $mahasiswaModel->universitas($pt, $id, $filters);
+
+        // Data for Dropdowns
+        $listProdi = $prodiModel->where('id_pt', $pt)->findAll();
+        
+        $db = \Config\Database::connect();
+        $listAngkatan = $db->table('mahasiswas')
+                            ->select('angkatan')
+                            ->distinct()
+                            ->where('id_pt', $pt)
+                            ->orderBy('angkatan', 'DESC')
+                            ->get()
+                            ->getResultArray();
+
+        $listKategori = $db->table('mahasiswas')
+                            ->select('kategori')
+                            ->distinct()
+                            ->where('id_pt', $pt)
+                            ->where('kategori !=', '')
+                            ->where('kategori IS NOT NULL')
+                            ->orderBy('kategori', 'ASC')
+                            ->get()
+                            ->getResultArray();
 
         $data = [
-            'title'         => 'Ajukan Mahasiswa',
-            'id_pencairan'  => $id,
-            'mahasiswa'     => $listMahasiswa,
-            'pager'         => $mahasiswaModel->pager,
-            'keyword'       => $keyword,
-            'status_filter' => $statusFilter,
-            'entries'       => $entries // Kirim info entries ke view
+            'title'           => 'Ajukan Mahasiswa',
+            'id_pencairan'    => $id,
+            'mahasiswa'       => $listMahasiswa,
+            'pager'           => $mahasiswaModel->pager,
+            'keyword'         => $keyword,
+            'filter_prodi'    => $filterProdi,
+            'filter_angkatan' => $filterAngkatan,
+            'filter_kategori' => $filterKategori,
+            'list_prodi'      => $listProdi,
+            'list_angkatan'   => $listAngkatan,
+            'list_kategori'   => $listKategori,
+            'entries'         => $entries
         ];
 
         return view('admin/verifikasi_2', $data);
@@ -871,22 +896,60 @@ class Pencairan extends BaseController
     {
         $model = new PencairanModel();
         $data = $model->find($id);
+        $idPt = $data['id_pt']; // Ambil ID PT dari data pencairan
 
-        // Tangkap keyword dari query string (?keyword=...)
+        // Tangkap keyword dan filter dari query string
         $keyword = $this->request->getGet('keyword');
+        $filterProdi = $this->request->getGet('filter_prodi');
+        $filterAngkatan = $this->request->getGet('filter_angkatan');
+
+        // Entries
+        $entries = $this->request->getGet('entries') ?? 10;
+        $validEntries = [10, 25, 50, 100];
+        if (!in_array($entries, $validEntries)) {
+            $entries = 10;
+        }
 
         $mahasiswaModel = new MahasiswaModel();
+        $prodiModel = new \App\Models\ProdiModel(); // Load ProdiModel
+
+        // Data for Dropdowns
+        $listProdi = $prodiModel->where('id_pt', $idPt)->findAll();
+        
+        $db = \Config\Database::connect();
+        $listAngkatan = $db->table('mahasiswas')
+                            ->select('angkatan')
+                            ->distinct()
+                            ->where('id_pt', $idPt)
+                            ->orderBy('angkatan', 'DESC')
+                            ->get()
+                            ->getResultArray();
 
         $dataView = [
-            'data'      => $data,
-            'title'     => 'Detail Pencairan',
-            'keyword'   => $keyword,
-            // Kirim keyword ke method pencairan di model
-            'mahasiswa' => $mahasiswaModel->pencairan($id, $keyword),
+            'data'            => $data,
+            'title'           => 'Detail Pencairan',
+            'keyword'         => $keyword,
+            'filter_prodi'    => $filterProdi,
+            'filter_angkatan' => $filterAngkatan,
+            'entries'         => $entries,
+            'list_prodi'      => $listProdi,
+            'list_angkatan'   => $listAngkatan,
+            // Kirim keyword dan filter ke method pencairan di model
+            'mahasiswa' => $mahasiswaModel->pencairan($id, $keyword, $filterProdi, $filterAngkatan, $entries),
             'pager'     => $mahasiswaModel->pager,
-            'jumlah'    => $mahasiswaModel->where('id_pencairan', $id)->countAllResults()
+            // Hitung jumlah dengan filter (opsional, tapi countAllResults biasanya mengabaikan filter yg di apply di method lain kecuali di chain)
+            // Untuk simplisitas, kita gunakan countAllResults dengan filter manual atau biarkan total rows dari pager jika memungkinkan.
+            // Namun, countAllResults() tanpa where akan menghitung SEMUA di tabel jika tidak hati-hati.
+            // Kita gunakan logic count yang sama dengan query pencairan() tapi countAllResults()
+            // ATAU: Kita ambil total dari Pager yang sudah otomatis menghitungnya.
+            'jumlah'    => $mahasiswaModel->pager->getTotal('default') 
         ];
-
+        
+        // Note: $mahasiswaModel->pager->getTotal() only works AFTER paginate() is called.
+        // Since we called pencairan() which calls paginate(), it should be available.
+        // Fallback or explicit count:
+        // $dataView['jumlah'] = $mahasiswaModel->where('id_pencairan', $id)->countAllResults(); // Ini hitung total TANPA filter
+         
         return view('admin/verifikasi_detail', $dataView);
     }
     public function ditolak($id)

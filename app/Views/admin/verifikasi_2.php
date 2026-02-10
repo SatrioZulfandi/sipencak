@@ -264,80 +264,92 @@
         </div>
     </div>
 
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-md-end gap-2 flex-wrap">
-            <!-- Filter Entries -->
-            <form action="" method="get" class="d-flex gap-2 align-items-center me-auto">
-                <span class="text-muted fw-bold" style="font-size: 0.8rem;">Show</span>
-                <select name="entries" class="filter-select-elite" onchange="this.form.submit()" style="
-                        padding: 0.4rem 0.8rem;
-                        border-radius: 8px;
-                        border: 2px solid var(--border-color);
-                        background: #fff;
-                        font-weight: 700;
-                        font-size: 0.8rem;
-                        color: var(--text-dark);
-                        cursor: pointer;
-                        min-width: 70px;
-                    ">
-                    <?php foreach([10, 25, 50, 100] as $val): ?>
-                        <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="text-muted fw-bold" style="font-size: 0.8rem;">entries</span>
-                
-                <!-- Preserve other filters -->
-                <input type="hidden" name="keyword" value="<?= esc($keyword ?? '') ?>">
-                <input type="hidden" name="status_filter" value="<?= esc($status_filter ?? '') ?>">
-            </form>
+    <div class="card-body p-4">
+        <form action="" method="get" class="w-100">
+            <div class="row g-2 align-items-end">
+                <!-- Search Input (Desktop: First/Left, Mobile: Top Full) -->
+                <div class="col-12 col-md-3">
+                    <label class="text-uppercase fw-bold text-muted small mb-1">Cari Data</label>
+                    <div class="search-container position-relative w-100">
+                        <input type="text" name="keyword" class="form-control form-control-sm border shadow-sm ps-5 bg-white w-100"
+                            placeholder="Cari NIM / Nama..."
+                            style="padding-left: 2.5rem !important; color: #64748b; border-radius: 12px; border-color: #e2e8f0;"
+                            value="<?= esc($keyword ?? '') ?>">
+                        <i class="fas fa-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; z-index: 5;"></i>
 
-            <!-- Filter Status -->
-            <form action="" method="get" class="d-flex gap-2 align-items-center">
-                <input type="hidden" name="entries" value="<?= esc($entries ?? 10) ?>">
-                <div class="filter-dropdown-wrapper" style="position: relative;">
-                    <i class="fas fa-filter" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.75rem; z-index: 1;"></i>
-                    <select name="status_filter" class="filter-select-elite" onchange="this.form.submit()" style="
-                        padding: 0.5rem 1rem 0.5rem 2.2rem;
-                        border-radius: 12px;
-                        border: 2px solid var(--border-color);
-                        background: #fff;
-                        font-weight: 700;
-                        font-size: 0.8rem;
-                        color: var(--text-dark);
-                        min-width: 170px;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                        appearance: none;
-                        -webkit-appearance: none;
-                        background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%2364748b\"><path d=\"M7 10l5 5 5-5z\"/></svg>');
-                        background-repeat: no-repeat;
-                        background-position: right 10px center;
-                        background-size: 18px;
-                    ">
-                        <option value="">Semua Status</option>
-                        <option value="belum" <?= ($status_filter ?? '') === 'belum' ? 'selected' : '' ?>>Belum Diajukan</option>
-                        <option value="diajukan" <?= ($status_filter ?? '') === 'diajukan' ? 'selected' : '' ?>>Sudah Diajukan</option>
+                        <?php if (!empty($keyword)): ?>
+                            <a href="<?= current_url() ?>" class="text-decoration-none position-absolute text-muted" style="right: 1rem; top: 50%; transform: translateY(-50%); z-index: 5;" title="Bersihkan">
+                                <i class="fas fa-times-circle"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Filter Entries (Desktop: Auto, Mobile: col-6) -->
+                <div class="col-6 col-md-auto">
+                    <label class="text-uppercase fw-bold text-muted small mb-1">Jumlah</label>
+                    <select name="entries" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                        style="font-weight: 500; color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                        onchange="this.form.submit()">
+                        <?php foreach([10, 25, 50, 100] as $val): ?>
+                            <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
-                <input type="hidden" name="keyword" value="<?= esc($keyword ?? '') ?>">
-            </form>
-            
-            <!-- Search -->
-            <form action="" method="get" class="search-container">
-                <input type="text" name="keyword" class="search-input-elite"
-                    placeholder="Cari NIM atau Nama Mahasiswa..."
-                    value="<?= esc($keyword ?? '') ?>">
-                <i class="fas fa-search search-icon"></i>
-                <input type="hidden" name="status_filter" value="<?= esc($status_filter ?? '') ?>">
-                <input type="hidden" name="entries" value="<?= esc($entries ?? 10) ?>">
 
-                <?php if (!empty($keyword)): ?>
-                    <a href="<?= base_url('verifikasi-mahasiswa/' . $id_pencairan) ?>" class="clear-search" title="Reset">
-                        <i class="fas fa-times-circle text-danger"></i>
-                    </a>
-                <?php endif; ?>
-            </form>
-        </div>
+                <!-- Filter Prodi (Desktop: col-3, Mobile: col-6) -->
+                <div class="col-6 col-md-3">
+                    <label class="text-uppercase fw-bold text-muted small mb-1">Program Studi</label>
+                    <select name="filter_prodi" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                        style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                        onchange="this.form.submit()">
+                        <option value="">Semua Prodi</option>
+                        <?php if (!empty($list_prodi)): ?>
+                            <?php foreach($list_prodi as $lp): ?>
+                                <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
+                                    <?= esc($lp['nama_prodi']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <!-- Filter Angkatan (Desktop: col-2, Mobile: col-6) -->
+                <div class="col-6 col-md-2">
+                    <label class="text-uppercase fw-bold text-muted small mb-1">Angkatan</label>
+                    <select name="filter_angkatan" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                        style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                        onchange="this.form.submit()">
+                        <option value="">Semua</option>
+                        <?php if (!empty($list_angkatan)): ?>
+                            <?php foreach($list_angkatan as $la): ?>
+                                <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
+                                    <?= esc($la['angkatan']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <!-- Filter Kategori (Desktop: col-2, Mobile: col-12) -->
+                <div class="col-12 col-md">
+                     <label class="text-uppercase fw-bold text-muted small mb-1">Kategori</label>
+                     <select name="filter_kategori" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                        style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                        onchange="this.form.submit()">
+                        <option value="">Semua</option>
+                        <?php if (!empty($list_kategori)): ?>
+                            <?php foreach($list_kategori as $cat): ?>
+                                <option value="<?= $cat['kategori'] ?>" <?= ($filter_kategori == $cat['kategori']) ? 'selected' : '' ?>>
+                                    <?= esc($cat['kategori']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const idPencairan = <?= $id_pencairan ?>;

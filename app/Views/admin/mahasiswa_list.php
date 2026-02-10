@@ -408,68 +408,69 @@
     <div class="card card-elite mb-4 border-0 shadow-sm" style="background: #f8fafc; border-radius: 20px;">
         <div class="card-body p-4">
             <form action="" method="get">
-                <div class="row g-3 align-items-center">
-                    <!-- Filter Entries (Left) -->
-                    <div class="col-12 col-md-auto">
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="text-muted small text-nowrap">Show</span>
-                            <select name="entries" class="form-select form-select-sm border-0 shadow-sm bg-white" style="width: auto; font-weight: 500; color: #64748b;" onchange="this.form.submit()">
-                                <?php foreach([10, 25, 50, 100] as $val): ?>
-                                    <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <span class="text-muted small text-nowrap">entries</span>
+                <div class="row g-2">
+                    <!-- Search Input (Mobile: Top Full, Desktop: Right Auto) -->
+                    <div class="col-12 col-md order-1 order-md-4">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Cari Data</label>
+                        <div class="search-container position-relative w-100">
+                            <input type="text" name="keyword" class="form-control form-control-sm border shadow-sm ps-5 bg-white w-100"
+                                placeholder="Cari NIM / Nama..."
+                                style="padding-left: 2.5rem !important; color: #64748b; border-radius: 12px; border-color: #e2e8f0;"
+                                value="<?= esc($keyword ?? '') ?>">
+                            <i class="fas fa-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; z-index: 5;"></i>
+
+                            <?php if (!empty($keyword)): ?>
+                                <a href="<?= base_url('mahasiswa-list') ?>" class="text-decoration-none position-absolute text-muted" style="right: 1rem; top: 50%; transform: translateY(-50%); z-index: 5;" title="Bersihkan">
+                                    <i class="fas fa-times-circle"></i>
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
 
-                    <!-- Main Filters (Right) - Expands to fill width -->
-                    <div class="col-12 col-md">
-                        <div class="row g-3">
-                            <!-- Filter Prodi -->
-                            <div class="col-12 col-md-4">
-                                <select name="filter_prodi" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" style="color: #64748b;" onchange="this.form.submit()">
-                                    <option value="">Semua Prodi</option>
-                                    <?php if (!empty($list_prodi)): ?>
-                                        <?php foreach($list_prodi as $lp): ?>
-                                            <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
-                                                <?= esc($lp['nama_prodi']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
+                    <!-- Filter Entries (Mobile: col-4, Desktop: Auto) -->
+                    <div class="col-4 col-md-auto order-2 order-md-1">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Jumlah</label>
+                        <select name="entries" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="font-weight: 500; color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <?php foreach([10, 25, 50, 100] as $val): ?>
+                                <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-                            <!-- Filter Angkatan -->
-                            <div class="col-12 col-md-3">
-                                <select name="filter_angkatan" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" style="color: #64748b;" onchange="this.form.submit()">
-                                    <option value="">Semua Angkatan</option>
-                                    <?php if (!empty($list_angkatan)): ?>
-                                        <?php foreach($list_angkatan as $la): ?>
-                                            <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
-                                                <?= esc($la['angkatan']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
+                    <!-- Filter Prodi (Mobile: col-4, Desktop: Left-Middle) -->
+                    <div class="col-4 col-md-3 order-3 order-md-2">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Program Studi</label>
+                        <select name="filter_prodi" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <option value="">Semua Program Studi</option>
+                            <?php if (!empty($list_prodi)): ?>
+                                <?php foreach($list_prodi as $lp): ?>
+                                    <option value="<?= $lp['id'] ?>" <?= ($filter_prodi == $lp['id']) ? 'selected' : '' ?>>
+                                        <?= esc($lp['nama_prodi']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
 
-                            <!-- Search Input -->
-                            <div class="col-12 col-md">
-                                <div class="search-container position-relative w-100">
-                                    <input type="text" name="keyword" class="form-control form-control-sm border-0 shadow-sm ps-5 bg-white w-100"
-                                        placeholder="Cari NIM / Nama..."
-                                        style="padding-left: 2.5rem !important; color: #64748b;"
-                                        value="<?= esc($keyword ?? '') ?>">
-                                    <i class="fas fa-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; z-index: 5;"></i>
-
-                                    <?php if (!empty($keyword)): ?>
-                                        <a href="<?= base_url('mahasiswa-list') ?>" class="text-decoration-none position-absolute text-muted" style="right: 1rem; top: 50%; transform: translateY(-50%); z-index: 5;" title="Bersihkan">
-                                            <i class="fas fa-times-circle"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Filter Angkatan (Mobile: col-4, Desktop: Middle) -->
+                    <div class="col-4 col-md-2 order-4 order-md-3">
+                        <label class="text-uppercase fw-bold text-muted small mb-1">Angkatan</label>
+                        <select name="filter_angkatan" class="form-select form-select-sm border shadow-sm bg-white w-100" 
+                            style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
+                            onchange="this.form.submit()">
+                            <option value="">Semua</option>
+                            <?php if (!empty($list_angkatan)): ?>
+                                <?php foreach($list_angkatan as $la): ?>
+                                    <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
+                                        <?= esc($la['angkatan']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
                     </div>
                 </div>
             </form>
