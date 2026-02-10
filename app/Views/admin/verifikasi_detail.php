@@ -215,6 +215,72 @@
         border-color: var(--primary);
         color: white;
     }
+
+    /* --- MODAL ELITE --- */
+    .modal {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content-elite {
+        border: none;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-close-custom {
+        background: none;
+        border: none;
+        color: var(--slate);
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-close-custom:hover {
+        color: #ef4444;
+        transform: rotate(90deg);
+    }
+
+    /* --- BUTTONS ELITE --- */
+    .btn-elite {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.25s ease;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-primary-elite {
+        background-color: var(--primary);
+        color: white !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn-primary-elite:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-outline-elite {
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--dark);
+    }
+
+    .btn-outline-elite:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
 </style>
 
 <div class="container-fluid px-4 py-4 fade-in-up">
@@ -395,19 +461,24 @@
 </div>
 
 <?php if ($data['status'] === 'Selesai'): ?>
-    <div class="modal fade" id="modalSelesai" tabindex="-1">
+    <div class="modal fade" id="modalSelesai" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
-                <div class="modal-header bg-success text-white border-0 py-3 px-4">
-                    <h6 class="modal-title fw-bold"><i class="fas fa-check-circle me-2"></i> Konfirmasi Sistem</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content modal-content-elite">
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="fw-bold mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Konfirmasi Sistem</h5>
+                    <button type="button" class="btn-close-custom" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="modal-body text-center p-5">
-                    <i class="fas fa-cloud-upload-alt fa-3x text-success mb-4 opacity-50"></i>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                         <i class="fas fa-paper-plane fa-3x text-success opacity-25"></i>
+                    </div>
                     <p class="text-muted fw-bold small mb-4">Data telah berhasil diverifikasi dan disinkronkan dengan Portal SIMKIP Pusat.</p>
-                    <a href="https://kip-kuliah.kemdiktisaintek.go.id/sim/monitoring-pencairan" target="_blank" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
-                        Buka Monitoring SIMKIP <i class="fas fa-external-link-alt ms-2"></i>
+                    <a href="https://kip-kuliah.kemdiktisaintek.go.id/sim/monitoring-pencairan" target="_blank" class="btn-elite btn-primary-elite w-100">
+                        <i class="fas fa-external-link-alt me-2"></i> Buka Monitoring SIMKIP
                     </a>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn-elite btn-outline-elite w-100" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -415,22 +486,21 @@
 <?php endif; ?>
 
 <?php if ($data['status'] === 'Ditolak' && !empty($data['alasan_tolak'])): ?>
-    <div class="modal fade" id="modalTolak" tabindex="-1">
+    <div class="modal fade" id="modalTolak" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
-                <div class="modal-header bg-danger text-white border-0 py-3 px-4">
-                    <h6 class="modal-title fw-bold"><i class="fas fa-exclamation-circle me-2"></i> Alasan Penolakan</h6>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <div class="modal-content modal-content-elite">
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="fw-bold mb-0 text-danger"><i class="fas fa-exclamation-circle me-2"></i> Alasan Penolakan</h5>
+                    <button type="button" class="btn-close-custom" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="bg-light p-4 rounded-4 border-start border-4 border-danger">
-                        <p class="mb-0 text-dark fw-bold small" style="line-height: 1.8;">
-                            <?= nl2br(esc($data['alasan_tolak'])) ?>
-                        </p>
+                    <div class="p-3 border rounded-4 bg-light text-dark shadow-sm">
+                        <?= nl2br(esc($data['alasan_tolak'])) ?>
                     </div>
+                    <p class="small text-muted mt-3 mb-0 text-center"><i class="fas fa-info-circle me-1"></i> Silakan perbaiki data sesuai alasan di atas.</p>
                 </div>
-                <div class="modal-footer border-0 pb-4 justify-content-center">
-                    <button type="button" class="btn btn-dark rounded-pill px-5 fw-bold btn-sm shadow-sm" data-dismiss="modal">Tutup</button>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn-elite btn-outline-elite w-100" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>

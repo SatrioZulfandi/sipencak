@@ -382,12 +382,12 @@
                                 <td>
                                     <?php if ($item['status'] === 'Selesai'): ?>
                                         <span class="badge-status-elite badge-selesai" style="cursor:pointer"
-                                            data-bs-toggle="modal" data-bs-target="#modalSelesai<?= $item['id'] ?>">
+                                            data-toggle="modal" data-target="#modalSelesai<?= $item['id'] ?>">
                                             <?= $item['status'] ?> <i class="fas fa-info-circle opacity-50"></i>
                                         </span>
                                     <?php elseif ($item['status'] === 'Ditolak'): ?>
                                         <span class="badge-status-elite badge-ditolak" style="cursor:pointer"
-                                            data-bs-toggle="modal" data-bs-target="#modalAlasan<?= $item['id'] ?>">
+                                            data-toggle="modal" data-target="#modalAlasan<?= $item['id'] ?>">
                                             <?= $item['status'] ?> <i class="fas fa-exclamation-triangle opacity-50"></i>
                                         </span>
                                     <?php else: ?>
@@ -431,7 +431,7 @@
                 <div class="modal-content modal-content-elite">
                     <div class="modal-header border-0 p-4 pb-0">
                         <h5 class="fw-bold mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Verifikasi Selesai</h5>
-                        <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                        <button type="button" class="btn-close-custom" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body p-4 text-center">
                         <div class="mb-4">
@@ -446,7 +446,7 @@
                         </a>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" class="btn-elite btn-outline-elite w-100" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn-elite btn-outline-elite w-100" data-dismiss="modal">Tutup</button>
                     </div>
                 </div>
             </div>
@@ -459,7 +459,7 @@
                 <div class="modal-content modal-content-elite">
                     <div class="modal-header border-0 p-4 pb-0">
                         <h5 class="fw-bold mb-0 text-danger"><i class="fas fa-exclamation-circle me-2"></i> Alasan Penolakan</h5>
-                        <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                        <button type="button" class="btn-close-custom" data-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
                     </div>
                     <div class="modal-body p-4">
                         <div class="p-3 border rounded-4 bg-light text-dark shadow-sm">
@@ -468,7 +468,7 @@
                         <p class="small text-muted mt-3 mb-0 text-center"><i class="fas fa-info-circle me-1"></i> Silakan perbaiki data sesuai alasan di atas.</p>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" class="btn-elite btn-outline-elite w-100" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn-elite btn-outline-elite w-100" data-dismiss="modal">Tutup</button>
                     </div>
                 </div>
             </div>
