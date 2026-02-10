@@ -268,7 +268,7 @@
         <form action="" method="get" class="w-100">
             <div class="row g-2 align-items-end">
                 <!-- Search Input (Desktop: First/Left, Mobile: Top Full) -->
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-4">
                     <label class="text-uppercase fw-bold text-muted small mb-1">Cari Data</label>
                     <div class="search-container position-relative w-100">
                         <input type="text" name="keyword" class="form-control form-control-sm border shadow-sm ps-5 bg-white w-100"
@@ -298,7 +298,7 @@
                 </div>
 
                 <!-- Filter Prodi (Desktop: col-3, Mobile: col-6) -->
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
                     <label class="text-uppercase fw-bold text-muted small mb-1">Program Studi</label>
                     <select name="filter_prodi" class="form-select form-select-sm border shadow-sm bg-white w-100" 
                         style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
@@ -315,7 +315,7 @@
                 </div>
 
                 <!-- Filter Angkatan (Desktop: col-2, Mobile: col-6) -->
-                <div class="col-6 col-md-2">
+                <div class="col-6 col-md">
                     <label class="text-uppercase fw-bold text-muted small mb-1">Angkatan</label>
                     <select name="filter_angkatan" class="form-select form-select-sm border shadow-sm bg-white w-100" 
                         style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
@@ -325,23 +325,6 @@
                             <?php foreach($list_angkatan as $la): ?>
                                 <option value="<?= $la['angkatan'] ?>" <?= ($filter_angkatan == $la['angkatan']) ? 'selected' : '' ?>>
                                     <?= esc($la['angkatan']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
-                </div>
-
-                <!-- Filter Kategori (Desktop: col-2, Mobile: col-12) -->
-                <div class="col-12 col-md">
-                     <label class="text-uppercase fw-bold text-muted small mb-1">Kategori</label>
-                     <select name="filter_kategori" class="form-select form-select-sm border shadow-sm bg-white w-100" 
-                        style="color: #64748b; border-radius: 12px; border-color: #e2e8f0;" 
-                        onchange="this.form.submit()">
-                        <option value="">Semua</option>
-                        <?php if (!empty($list_kategori)): ?>
-                            <?php foreach($list_kategori as $cat): ?>
-                                <option value="<?= $cat['kategori'] ?>" <?= ($filter_kategori == $cat['kategori']) ? 'selected' : '' ?>>
-                                    <?= esc($cat['kategori']) ?>
                                 </option>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -463,7 +446,7 @@
         </div>
 
         <div class="p-4 bg-light border-top d-flex justify-content-between align-items-center">
-            <a href="<?= base_url('verifikasi-pembaharuan-status') ?>" class="btn-elite btn-elite-outline">
+            <a href="<?= base_url('verifikasi-edit/' . $id_pencairan) ?>" class="btn-elite btn-elite-outline">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
             <button type="button" class="btn-elite btn-elite-success shadow" id="btn-ajukan">

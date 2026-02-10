@@ -187,6 +187,13 @@
         <form action="/permohonan-store" method="POST" enctype="multipart/form-data" class="main-form-card">
             <?= csrf_field() ?>
 
+            <!-- Error Alert -->
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="alert alert-danger fade show mb-4" role="alert" style="border-radius: 12px; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <?= session()->getFlashdata('error') ?>
+                </div>
+            <?php endif; ?>
+
             <?php
             $bulan = date('n');
             $tahun = date('Y');
@@ -214,6 +221,7 @@
                 <div class="row g-4">
                     <div class="col-md-6">
                         <label class="field-label">Kategori Mahasiswa <span class="text-danger">*</span></label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.85rem;">(Pilih salah satu kategori)</small>
                         <div class="radio-group-modern">
                             <label class="radio-card">
                                 <input type="radio" name="kategori_penerima" id="kategori1" value="Skema Pembiayaan Penuh" required>
@@ -227,6 +235,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="field-label">Periode Semester <span class="text-danger">*</span></label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.85rem;">(Pilih salah satu periode)</small>
                         <div class="radio-group-modern">
                             <label class="radio-card">
                                 <input type="radio" name="semester" id="sem1" value="Ganjil" required>
@@ -262,15 +271,15 @@
                     <div class="col-md-6 mt-3">
                         <label class="field-label">Scan SK Penetapan</label>
                         <div class="file-upload-elite">
-                            <i class="fas fa-file-contract text-primary fs-5"></i>
+                            <i class="fas fa-file-pdf text-danger fs-5"></i>
                             <input type="file" class="form-control border-0 bg-transparent p-0 shadow-none" name="sk_penetapan" accept=".pdf" required onchange="cekUkuran(this)">
                         </div>
                     </div>
                     <div class="col-md-6 mt-3">
-                        <label class="field-label">Scan SK Pembatalan</label>
+                        <label class="field-label">Scan SK Pembatalan (Opsional)</label>
                         <div class="file-upload-elite">
-                            <i class="fas fa-file-signature text-warning fs-5"></i>
-                            <input type="file" class="form-control border-0 bg-transparent p-0 shadow-none" name="sk_pembatalan" accept=".pdf" required onchange="cekUkuran(this)">
+                            <i class="fas fa-file-pdf text-danger fs-5"></i>
+                            <input type="file" class="form-control border-0 bg-transparent p-0 shadow-none" name="sk_pembatalan" accept=".pdf" onchange="cekUkuran(this)">
                         </div>
                     </div>
                 </div>
@@ -279,7 +288,7 @@
                 <div class="mb-2">
                     <label class="field-label">Unggah Berita Acara Evaluasi</label>
                     <div class="file-upload-elite">
-                        <i class="fas fa-clipboard-check text-success fs-5"></i>
+                        <i class="fas fa-file-pdf text-danger fs-5"></i>
                         <input type="file" class="form-control border-0 bg-transparent p-0 shadow-none" name="berita_acara" accept=".pdf" required onchange="cekUkuran(this)">
                     </div>
                 </div>
@@ -292,12 +301,43 @@
                 </div>
             </div>
 
+            <style>
+                .btn-elite-primary {
+                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    color: white;
+                    padding: 0.8rem 2rem;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    border: none;
+                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+                    transition: all 0.3s ease;
+                }
+                
+                .btn-elite-primary:hover {
+                    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+                    transform: translateY(-2px);
+                    color: white;
+                }
+
+                /* File Preview Style */
+                .file-preview-badge {
+                    background: #fff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 0.75rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                }
+            </style>
+
             <div class="action-bar">
                 <a href="/verifikasi-pembaharuan-status" class="btn-back-elite">
                     <i class="fas fa-arrow-left me-2"></i> Kembali
                 </a>
-                <button type="submit" class="btn-save-elite">
-                    <i class="fas fa-save me-2"></i> Simpan Permohonan
+                <button type="submit" class="btn-elite-primary">
+                    Simpan & Lanjut <i class="fas fa-arrow-right ms-2"></i>
                 </button>
             </div>
         </form>
@@ -317,6 +357,83 @@
         if (input.files[0] && input.files[0].size > maxSize) {
             input.value = ""; // kosongkan file
             showAlert(); // tampilkan pesan
+            return;
+        }
+        
+        // Handle Preview if file is valid
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const inputName = input.getAttribute('name');
+            handleFileSelect(input, inputName, file);
+        }
+    }
+
+    function handleFileSelect(inputElement, idPrefix, file) {
+        // Find the wrapper container
+        const wrapper = inputElement.closest('.file-upload-elite');
+        
+        // Hide the wrapper (icon + input)
+        if (wrapper) {
+            wrapper.style.display = 'none';
+        } else {
+             // Fallback if user changes layout again
+            inputElement.style.display = 'none';
+        }
+
+        // Create Preview ID
+        const previewId = 'preview-' + idPrefix;
+        
+        // Remove existing preview if any
+        let previewContainer = document.getElementById(previewId);
+        if (previewContainer) {
+            previewContainer.remove();
+        }
+
+        // Create Object URL
+        const fileUrl = URL.createObjectURL(file);
+
+        // Create Preview HTML
+        const html = `
+            <div class="file-preview-badge" id="${previewId}">
+                <div class="d-flex align-items-center gap-2" style="overflow: hidden;">
+                    <i class="fas fa-file-pdf text-danger fs-5"></i>
+                    <span class="fw-bold small text-dark text-truncate" style="max-width: 200px;">${file.name}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 10px;" onclick="removeFile('${idPrefix}')">HAPUS</button>
+                </div>
+            </div>
+        `;
+
+        // Insert after the wrapper (or input if wrapper not found)
+        if (wrapper) {
+            wrapper.insertAdjacentHTML('afterend', html);
+        } else {
+            inputElement.insertAdjacentHTML('afterend', html);
+        }
+    }
+
+    function removeFile(idPrefix) {
+        // Find input
+        const input = document.querySelector(`input[name="${idPrefix}"]`);
+        
+        if (input) {
+            input.value = ""; // Clear file
+            
+            // Show wrapper
+            const wrapper = input.closest('.file-upload-elite');
+            if (wrapper) {
+                wrapper.style.display = 'flex';
+            } else {
+                input.style.display = 'block';
+            }
+        }
+
+        // Remove preview
+        const preview = document.getElementById('preview-' + idPrefix);
+        if (preview) {
+            preview.remove();
         }
     }
 

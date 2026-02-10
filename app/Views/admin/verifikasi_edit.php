@@ -82,11 +82,14 @@
         background: #f1f5f9;
         border: 2px solid transparent;
         border-radius: 12px;
-        padding: 0.75rem 1rem;
+        padding: 0.5rem; /* Reduced padding for file inputs */
+        min-height: 48px; /* Ensure minimum height */
         font-size: 0.9rem;
         font-weight: 600;
         color: var(--dark);
         transition: all 0.3s;
+        display: flex; /* Flexbox helps with alignment */
+        align-items: center;
     }
 
     .input-premium:focus {
@@ -156,6 +159,28 @@
         justify-content: space-between;
         align-items: center;
     }
+
+    .btn-elite-secondary {
+        background: #f1f5f9;
+        color: var(--slate);
+        border: 1px solid var(--border);
+        padding: 0.7rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-elite-secondary:hover {
+        background: #e2e8f0;
+        color: var(--dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
 </style>
 
 <div class="container py-5 fade-in-up">
@@ -163,6 +188,13 @@
 
         <form action="/verifikasi-update/<?= $data['id'] ?>" method="POST" enctype="multipart/form-data" class="main-form-card">
             <?= csrf_field() ?>
+
+            <!-- Error Alert -->
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="alert alert-danger fade show mb-4" role="alert" style="border-radius: 12px; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <?= session()->getFlashdata('error') ?>
+                </div>
+            <?php endif; ?>
 
             <div class="form-hero d-flex justify-content-between align-items-center">
                 <div>
@@ -178,6 +210,7 @@
                 <div class="row g-4">
                     <div class="col-md-6">
                         <label class="field-label">Kategori Mahasiswa <span class="text-danger">*</span></label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.85rem;">(Pilih salah satu kategori)</small>
                         <div class="radio-group-modern">
                             <label class="radio-card">
                                 <input type="radio" name="kategori_penerima" value="Skema Pembiayaan Penuh" <?= old('kategori_penerima', $data['kategori_penerima']) == 'Skema Pembiayaan Penuh' ? 'checked' : '' ?> required>
@@ -192,6 +225,7 @@
 
                     <div class="col-md-6">
                         <label class="field-label">Periode Semester <span class="text-danger">*</span></label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.85rem;">(Pilih salah satu periode)</small>
                         <div class="radio-group-modern">
                             <label class="radio-card">
                                 <input type="radio" name="semester" value="Ganjil" <?= old('semester', $data['semester']) == 'Ganjil' ? 'checked' : '' ?> required>
@@ -220,69 +254,131 @@
 
                 <div class="section-divider">Berkas SPTJM</div>
                 <div class="file-display-box">
-                    <?php if (!empty($data['sptjm'])): ?>
-                        <div class="current-file-badge">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="fas fa-file-pdf text-danger fs-5"></i>
-                                <span class="fw-bold small text-dark"><?= esc($data['sptjm']) ?></span>
+                    <!-- Setup Wrapper ID -->
+                    <div id="wrapper-sptjm">
+                        <?php if (!empty($data['sptjm'])): ?>
+                            <!-- STATE: FILE ADA -->
+                            <div class="current-file-badge" id="badge-sptjm">
+                                <div class="d-flex align-items-center gap-2" style="overflow: hidden;">
+                                    <i class="fas fa-file-pdf text-danger fs-5"></i>
+                                    <span class="fw-bold small text-dark text-truncate"><?= esc($data['sptjm']) ?></span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="<?= base_url('file/' . $data['sptjm']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT</a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 10px;" onclick="removeFile('sptjm')">HAPUS</button>
+                                </div>
                             </div>
-                            <a href="<?= base_url('file/' . $data['sptjm']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT FILE SAAT INI</a>
-                        </div>
-                    <?php endif; ?>
-                    <label class="field-label">Update SPTJM (PDF, Kosongkan jika tetap)</label>
-                    <input type="file" class="form-control input-premium" name="sptjm" accept=".pdf" onchange="cekUkuran(this)">
+                            <!-- Input hidden untuk flag delete (0 = keep, 1 = delete) -->
+                            <input type="hidden" name="delete_sptjm" id="delete_sptjm" value="0">
+                            
+                            <!-- Input File (Hidden by default jika file ada) -->
+                            <div id="input-sptjm" style="display: none;">
+                                <label class="field-label">Upload SPTJM Baru (PDF)</label>
+                                <input type="file" class="form-control input-premium" name="sptjm" accept=".pdf" onchange="cekUkuran(this)">
+                                <button type="button" class="btn btn-sm btn-link text-muted mt-1 text-decoration-none" onclick="cancelRemove('sptjm')"><small>Batal ubah</small></button>
+                            </div>
+                        <?php else: ?>
+                            <!-- STATE: FILE KOSONG -->
+                            <input type="hidden" name="delete_sptjm" id="delete_sptjm" value="0">
+                            <label class="field-label">Upload SPTJM (PDF)</label>
+                            <input type="file" class="form-control input-premium" name="sptjm" accept=".pdf" onchange="cekUkuran(this)">
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <div class="section-divider">Informasi & Berkas SK</div>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="file-display-box">
-                            <?php if (!empty($data['sk_penetapan'])): ?>
-                                <div class="current-file-badge">
-                                    <i class="fas fa-file-contract text-primary"></i>
-                                    <span class="fw-bold small text-truncate ms-2 me-auto"><?= esc($data['sk_penetapan']) ?></span>
-                                    <a href="<?= base_url('file/' . $data['sk_penetapan']) ?>" target="_blank" class="text-primary"><i class="fas fa-external-link-alt"></i></a>
-                                </div>
-                            <?php endif; ?>
-                            <label class="field-label">Update SK Penetapan</label>
-                            <input type="file" class="form-control input-premium" name="sk_penetapan" accept=".pdf" onchange="cekUkuran(this)">
+                            <div id="wrapper-sk_penetapan">
+                                <?php if (!empty($data['sk_penetapan'])): ?>
+                                    <div class="current-file-badge" id="badge-sk_penetapan">
+                                        <div class="d-flex align-items-center gap-2" style="overflow: hidden;">
+                                            <i class="fas fa-file-contract text-primary fs-5"></i>
+                                            <span class="fw-bold small text-dark text-truncate"><?= esc($data['sk_penetapan']) ?></span>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a href="<?= base_url('file/' . $data['sk_penetapan']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 10px;" onclick="removeFile('sk_penetapan')">HAPUS</button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="delete_sk_penetapan" id="delete_sk_penetapan" value="0">
+                                    <div id="input-sk_penetapan" style="display: none;">
+                                        <label class="field-label">Upload SK Penetapan Baru (PDF)</label>
+                                        <input type="file" class="form-control input-premium" name="sk_penetapan" accept=".pdf" onchange="cekUkuran(this)">
+                                        <button type="button" class="btn btn-sm btn-link text-muted mt-1 text-decoration-none" onclick="cancelRemove('sk_penetapan')"><small>Batal ubah</small></button>
+                                    </div>
+                                <?php else: ?>
+                                    <input type="hidden" name="delete_sk_penetapan" id="delete_sk_penetapan" value="0">
+                                    <label class="field-label">Upload SK Penetapan (PDF)</label>
+                                    <input type="file" class="form-control input-premium" name="sk_penetapan" accept=".pdf" onchange="cekUkuran(this)">
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="file-display-box">
-                            <?php if (!empty($data['sk_pembatalan'])): ?>
-                                <div class="current-file-badge">
-                                    <i class="fas fa-file-signature text-warning"></i>
-                                    <span class="fw-bold small text-truncate ms-2 me-auto"><?= esc($data['sk_pembatalan']) ?></span>
-                                    <a href="<?= base_url('file/' . $data['sk_pembatalan']) ?>" target="_blank" class="text-warning"><i class="fas fa-external-link-alt"></i></a>
-                                </div>
-                            <?php endif; ?>
-                            <label class="field-label">Update SK Pembatalan</label>
-                            <input type="file" class="form-control input-premium" name="sk_pembatalan" accept=".pdf" onchange="cekUkuran(this)">
+                            <div id="wrapper-sk_pembatalan">
+                                <?php if (!empty($data['sk_pembatalan'])): ?>
+                                    <div class="current-file-badge" id="badge-sk_pembatalan">
+                                        <div class="d-flex align-items-center gap-2" style="overflow: hidden;">
+                                            <i class="fas fa-file-signature text-warning fs-5"></i>
+                                            <span class="fw-bold small text-dark text-truncate"><?= esc($data['sk_pembatalan']) ?></span>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a href="<?= base_url('file/' . $data['sk_pembatalan']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 10px;" onclick="removeFile('sk_pembatalan')">HAPUS</button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="delete_sk_pembatalan" id="delete_sk_pembatalan" value="0">
+                                    <div id="input-sk_pembatalan" style="display: none;">
+                                        <label class="field-label">Upload SK Pembatalan Baru (PDF)</label>
+                                        <input type="file" class="form-control input-premium" name="sk_pembatalan" accept=".pdf" onchange="cekUkuran(this)">
+                                        <button type="button" class="btn btn-sm btn-link text-muted mt-1 text-decoration-none" onclick="cancelRemove('sk_pembatalan')"><small>Batal ubah</small></button>
+                                    </div>
+                                <?php else: ?>
+                                    <input type="hidden" name="delete_sk_pembatalan" id="delete_sk_pembatalan" value="0">
+                                    <label class="field-label">Upload SK Pembatalan (PDF)</label>
+                                    <input type="file" class="form-control input-premium" name="sk_pembatalan" accept=".pdf" onchange="cekUkuran(this)">
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-divider">Berita Acara Evaluasi</div>
                 <div class="file-display-box">
-                    <?php if (!empty($data['berita_acara'])): ?>
-                        <div class="current-file-badge">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="fas fa-clipboard-check text-success fs-5"></i>
-                                <span class="fw-bold small text-dark"><?= esc($data['berita_acara']) ?></span>
+                    <div id="wrapper-berita_acara">
+                        <?php if (!empty($data['berita_acara'])): ?>
+                            <div class="current-file-badge" id="badge-berita_acara">
+                                <div class="d-flex align-items-center gap-2" style="overflow: hidden;">
+                                    <i class="fas fa-clipboard-check text-success fs-5"></i>
+                                    <span class="fw-bold small text-dark text-truncate"><?= esc($data['berita_acara']) ?></span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="<?= base_url('file/' . $data['berita_acara']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT</a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 10px;" onclick="removeFile('berita_acara')">HAPUS</button>
+                                </div>
                             </div>
-                            <a href="<?= base_url('file/' . $data['berita_acara']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 10px;">LIHAT FILE SAAT INI</a>
-                        </div>
-                    <?php endif; ?>
-                    <label class="field-label">Update Berita Acara</label>
-                    <input type="file" class="form-control input-premium" name="berita_acara" accept=".pdf" onchange="cekUkuran(this)">
+                            <input type="hidden" name="delete_berita_acara" id="delete_berita_acara" value="0">
+                            <div id="input-berita_acara" style="display: none;">
+                                <label class="field-label">Upload Berita Acara Baru (PDF)</label>
+                                <input type="file" class="form-control input-premium" name="berita_acara" accept=".pdf" onchange="cekUkuran(this)">
+                                <button type="button" class="btn btn-sm btn-link text-muted mt-1 text-decoration-none" onclick="cancelRemove('berita_acara')"><small>Batal ubah</small></button>
+                            </div>
+                        <?php else: ?>
+                            <input type="hidden" name="delete_berita_acara" id="delete_berita_acara" value="0">
+                            <label class="field-label">Upload Berita Acara (PDF)</label>
+                            <input type="file" class="form-control input-premium" name="berita_acara" accept=".pdf" onchange="cekUkuran(this)">
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <input type="hidden" name="id_pt" value="<?= old('id_pt', $data['id_pt'] ?? session()->get('pt')) ?>">
             </div>
 
             <div class="action-bar">
-                <a href="/verifikasi-pembaharuan-status" class="btn btn-link text-slate fw-bold text-decoration-none small">
+                <a href="/verifikasi-pembaharuan-status" class="btn-elite-secondary">
                     <i class="fas fa-arrow-left me-2"></i> Batal & Kembali
                 </a>
                 <button type="submit" class="btn btn-primary px-5 py-2 fw-bold rounded-pill shadow">
@@ -308,6 +404,26 @@
                 alertBox.style.display = 'none';
             }, 3000);
         }
+    }
+
+    function removeFile(field) {
+        // Set flag delete = 1
+        document.getElementById('delete_' + field).value = '1';
+        // Hide badge, Show input
+        document.getElementById('badge-' + field).style.display = 'none';
+        document.getElementById('input-' + field).style.display = 'block';
+    }
+
+    function cancelRemove(field) {
+        // Set flag delete = 0
+        document.getElementById('delete_' + field).value = '0';
+        // Reset file input
+        const fileInput = document.querySelector(`input[name="${field}"]`);
+        if (fileInput) fileInput.value = '';
+        
+        // Show badge, Hide input
+        document.getElementById('badge-' + field).style.display = 'flex';
+        document.getElementById('input-' + field).style.display = 'none';
     }
 </script>
 

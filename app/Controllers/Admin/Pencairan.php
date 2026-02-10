@@ -460,6 +460,7 @@ class Pencairan extends BaseController
         $maxSize = 2097152; // 2MB
 
         // === SPTJM ===
+        $deleteSptjm = $this->request->getPost('delete_sptjm');
         $sptjm = $this->request->getFile('sptjm');
         if ($sptjm && $sptjm->isValid() && !$sptjm->hasMoved()) {
             if ($sptjm->getSize() > $maxSize) {
@@ -471,10 +472,19 @@ class Pencairan extends BaseController
             $newsptjm = $sptjm->getRandomName();
             $sptjm->move($folder, $newsptjm);
         } else {
-            $newsptjm = $dataLama['sptjm'];
+            // Check if explicitly deleted
+            if ($deleteSptjm == '1') {
+                if (!empty($dataLama['sptjm']) && file_exists($folder . $dataLama['sptjm'])) {
+                    unlink($folder . $dataLama['sptjm']);
+                }
+                $newsptjm = null;
+            } else {
+                $newsptjm = $dataLama['sptjm'];
+            }
         }
 
         // === SK PENETAPAN ===
+        $deleteSkPenetapan = $this->request->getPost('delete_sk_penetapan');
         $sk_penetapan = $this->request->getFile('sk_penetapan');
         if ($sk_penetapan && $sk_penetapan->isValid() && !$sk_penetapan->hasMoved()) {
             if ($sk_penetapan->getSize() > $maxSize) {
@@ -486,7 +496,14 @@ class Pencairan extends BaseController
             $newSk_penetapan = $sk_penetapan->getRandomName();
             $sk_penetapan->move($folder, $newSk_penetapan);
         } else {
-            $newSk_penetapan = $dataLama['sk_penetapan'];
+            if ($deleteSkPenetapan == '1') {
+                if (!empty($dataLama['sk_penetapan']) && file_exists($folder . $dataLama['sk_penetapan'])) {
+                    unlink($folder . $dataLama['sk_penetapan']);
+                }
+                $newSk_penetapan = null;
+            } else {
+                $newSk_penetapan = $dataLama['sk_penetapan'];
+            }
         }
 
         // === SK PEMBATALAN ===
@@ -505,6 +522,7 @@ class Pencairan extends BaseController
         }
 
         // === BERITA ACARA ===
+        $deleteBeritaAcara = $this->request->getPost('delete_berita_acara');
         $berita_acara = $this->request->getFile('berita_acara');
         if ($berita_acara && $berita_acara->isValid() && !$berita_acara->hasMoved()) {
             if ($berita_acara->getSize() > $maxSize) {
@@ -516,12 +534,27 @@ class Pencairan extends BaseController
             $newBerita_acara = $berita_acara->getRandomName();
             $berita_acara->move($folder, $newBerita_acara);
         } else {
-            $newBerita_acara = $dataLama['berita_acara'];
+            if ($deleteBeritaAcara == '1') {
+                if (!empty($dataLama['berita_acara']) && file_exists($folder . $dataLama['berita_acara'])) {
+                    unlink($folder . $dataLama['berita_acara']);
+                }
+                $newBerita_acara = null;
+            } else {
+                $newBerita_acara = $dataLama['berita_acara'];
+            }
         }
 
         // Fix Logic Periode Update
         $semesterInput = $this->request->getPost('semester');
         $periodeFixed = 'Semester ' . $semesterInput;
+
+        // === VALIDATION ===
+        // Check if mandatory fields/files are empty
+        if (empty($newsptjm) || empty($newSk_penetapan) || empty($newBerita_acara) || 
+            empty($this->request->getPost('no_surat_permohonan')) || empty($this->request->getPost('tanggal'))) {
+            
+            return redirect()->back()->withInput()->with('error', 'Mohon lengkapi semua data dan berkas wajib (SPTJM, SK Penetapan, Berita Acara, No. SK, Tanggal) sebelum melanjutkan.');
+        }
 
         // Simpan ke database
         $model->update($id, [
@@ -540,7 +573,7 @@ class Pencairan extends BaseController
         // LOGGING
         (new LogModel())->log('update', 'pencairan', 'Memperbarui data verifikasi pengajuan ID: ' . $id);
 
-        return redirect()->to('verifikasi-pembaharuan-status');
+        return redirect()->to('verifikasi-mahasiswa/' . $id);
     }
 
     public function verifikasi_mahasiswa($id)
@@ -562,12 +595,21 @@ class Pencairan extends BaseController
             $entries = 10;
         }
 
+        // Fetch Pencairan Data to get Category
+        $pencairanModel = new \App\Models\PencairanModel();
+        $pencairan = $pencairanModel->find($id);
+        
+        // Enforce Category Filter based on Pencairan record
+        if (!empty($pencairan['kategori_penerima'])) {
+            $filterKategori = $pencairan['kategori_penerima'];
+        }
+
         // Prepare filters for model
         $filters = [
             'keyword' => $keyword,
             'filter_prodi' => $filterProdi,
             'filter_angkatan' => $filterAngkatan,
-            'filter_kategori' => $filterKategori,
+            'filter_kategori' => $filterKategori, // Now enforced
             'entries' => $entries
         ];
 
@@ -586,15 +628,7 @@ class Pencairan extends BaseController
                             ->get()
                             ->getResultArray();
 
-        $listKategori = $db->table('mahasiswas')
-                            ->select('kategori')
-                            ->distinct()
-                            ->where('id_pt', $pt)
-                            ->where('kategori !=', '')
-                            ->where('kategori IS NOT NULL')
-                            ->orderBy('kategori', 'ASC')
-                            ->get()
-                            ->getResultArray();
+
 
         $data = [
             'title'           => 'Ajukan Mahasiswa',
@@ -606,8 +640,7 @@ class Pencairan extends BaseController
             'filter_angkatan' => $filterAngkatan,
             'filter_kategori' => $filterKategori,
             'list_prodi'      => $listProdi,
-            'list_angkatan'   => $listAngkatan,
-            'list_kategori'   => $listKategori,
+            'list_angtakan'   => $listAngkatan,
             'entries'         => $entries
         ];
 
