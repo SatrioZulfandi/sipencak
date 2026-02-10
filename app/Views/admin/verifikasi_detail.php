@@ -281,6 +281,54 @@
         background: #f8fafc;
         border-color: #cbd5e1;
     }
+    .btn-outline-elite:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    /* --- SORT HEADER ELITE --- */
+    .sort-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Space between text and icon */
+        text-decoration: none;
+        color: var(--slate); 
+        font-weight: 800; /* Match existing th weight */
+        transition: all 0.2s ease;
+        padding: 0.25rem 0;
+        cursor: pointer;
+        width: 100%;
+        text-transform: uppercase;
+    }
+    
+    .sort-header:hover {
+        color: var(--primary);
+        transform: translateX(4px);
+    }
+    
+    .sort-header.active {
+        color: var(--primary);
+    }
+    
+    .sort-icon-wrapper {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s;
+        background: transparent;
+    }
+    
+    .sort-header:hover .sort-icon-wrapper {
+        background: #eff6ff;
+    }
+    
+    .sort-header.active .sort-icon-wrapper {
+        background: #dbeafe;
+        color: var(--primary);
+    }
 </style>
 
 <div class="container-fluid px-4 py-4 fade-in-up">
@@ -373,6 +421,8 @@
             </div>
 
             <form action="" method="get" class="w-100">
+                <input type="hidden" name="sort" value="<?= esc($sort ?? '') ?>">
+                <input type="hidden" name="order" value="<?= esc($order ?? '') ?>">
                 <div class="row g-2">
                     <!-- Search Input (Mobile: Top Full, Desktop: Right Auto) -->
                     <div class="col-12 col-md order-1 order-md-4">
@@ -444,15 +494,56 @@
         <div class="table-responsive">
             <table class="table-elite">
                 <thead>
+                    <?php
+                    $request = service('request');
+                    $currentSort = $sort ?? '';
+                    $currentOrder = $order ?? '';
+                    
+                    $getSortLink = function($column, $label) use ($currentSort, $currentOrder) {
+                        $newOrder = 'asc';
+                        $icon = 'fa-sort';
+                        $activeClass = '';
+                        $iconClass = 'text-muted opacity-25'; 
+                        
+                        if ($currentSort == $column) {
+                            $activeClass = 'active';
+                            if ($currentOrder == 'asc') {
+                                $newOrder = 'desc';
+                                $icon = 'fa-sort-up';
+                                $iconClass = 'text-primary';
+                            } elseif ($currentOrder == 'desc') {
+                                $newOrder = '';
+                                $icon = 'fa-sort-down';
+                                $iconClass = 'text-primary';
+                            }
+                        }
+                        
+                        $params = $_GET; 
+                        
+                        if ($newOrder) {
+                            $params['sort'] = $column;
+                            $params['order'] = $newOrder;
+                        } else {
+                            unset($params['sort']);
+                            unset($params['order']);
+                        }
+                        
+                        $queryString = http_build_query($params);
+                        
+                        return '<a href="?' . $queryString . '" class="sort-header ' . $activeClass . '" title="Urutkan berdasarkan ' . $label . '">' 
+                                . '<span>' . $label . '</span>' 
+                                . '<span class="sort-icon-wrapper"><i class="fas ' . $icon . ' ' . $iconClass . '"></i></span></a>';
+                    };
+                    ?>
                     <tr>
                         <th width="60" class="text-center">No</th>
-                        <th>NIM</th>
-                        <th>Nama Lengkap</th>
-                        <th>Program Studi</th>
-                        <th class="text-center">Jenjang</th>
-                        <th class="text-center">Angkatan</th>
-                        <th>Kategori</th>
-                        <th class="text-center">Status</th>
+                        <th><?= $getSortLink('nim', 'NIM') ?></th>
+                        <th><?= $getSortLink('nama', 'Nama Lengkap') ?></th>
+                        <th><?= $getSortLink('prodis.kode_prodi', 'Program Studi') ?></th>
+                        <th class="text-center"><?= $getSortLink('jenjang', 'Jenjang') ?></th>
+                        <th class="text-center"><?= $getSortLink('angkatan', 'Angkatan') ?></th>
+                        <th><?= $getSortLink('kategori', 'Kategori') ?></th>
+                        <th class="text-center"><?= $getSortLink('pembaruan_status', 'Status') ?></th>
                         <th class="text-center" width="100">Aksi</th>
                     </tr>
                 </thead>

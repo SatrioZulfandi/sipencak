@@ -604,13 +604,18 @@ class Pencairan extends BaseController
             $filterKategori = $pencairan['kategori_penerima'];
         }
 
+        $sort = $this->request->getGet('sort');
+        $order = $this->request->getGet('order');
+
         // Prepare filters for model
         $filters = [
             'keyword' => $keyword,
             'filter_prodi' => $filterProdi,
             'filter_angkatan' => $filterAngkatan,
             'filter_kategori' => $filterKategori, // Now enforced
-            'entries' => $entries
+            'entries' => $entries,
+            'sort' => $sort,
+            'order' => $order
         ];
 
         // Fetch data
@@ -641,7 +646,10 @@ class Pencairan extends BaseController
             'filter_kategori' => $filterKategori,
             'list_prodi'      => $listProdi,
             'list_angtakan'   => $listAngkatan,
-            'entries'         => $entries
+
+            'entries'         => $entries,
+            'sort'            => $sort,
+            'order'           => $order
         ];
 
         return view('admin/verifikasi_2', $data);
@@ -804,13 +812,18 @@ class Pencairan extends BaseController
         // Hitung dari tabel pengajuan_mahasiswa (Total keseluruhan di batch ini)
         $jumlahTotal = $pengajuanModel->where('id_pencairan', $id)->countAllResults();
 
+        $sort = $this->request->getGet('sort');
+        $order = $this->request->getGet('order');
+
         // Filters Array
         $filters = [
             'keyword' => $keyword,
             'filter_prodi' => $filterProdi,
             'filter_angkatan' => $filterAngkatan,
             'filter_kategori' => $filterKategori,
-            'entries' => $entries
+            'entries' => $entries,
+            'sort' => $sort,
+            'order' => $order
         ];
 
         // Retrieve Data Lists for Dropdowns (Sama seperti step 2)
@@ -993,6 +1006,9 @@ class Pencairan extends BaseController
             $entries = 10;
         }
 
+        $sort = $this->request->getGet('sort');
+        $order = $this->request->getGet('order');
+
         $mahasiswaModel = new MahasiswaModel();
         $prodiModel = new \App\Models\ProdiModel(); // Load ProdiModel
 
@@ -1017,8 +1033,10 @@ class Pencairan extends BaseController
             'entries'         => $entries,
             'list_prodi'      => $listProdi,
             'list_angkatan'   => $listAngkatan,
+            'sort'            => $sort,
+            'order'           => $order,
             // Kirim keyword dan filter ke method pencairan di model
-            'mahasiswa' => $mahasiswaModel->pencairan($id, $keyword, $filterProdi, $filterAngkatan, $entries),
+            'mahasiswa' => $mahasiswaModel->pencairan($id, $keyword, $filterProdi, $filterAngkatan, $entries, $sort, $order),
             'pager'     => $mahasiswaModel->pager,
             // Hitung jumlah dengan filter (opsional, tapi countAllResults biasanya mengabaikan filter yg di apply di method lain kecuali di chain)
             // Untuk simplisitas, kita gunakan countAllResults dengan filter manual atau biarkan total rows dari pager jika memungkinkan.

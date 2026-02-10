@@ -81,6 +81,11 @@ class MahasiswaModel extends Model
         $filterAngkatan = $filters['filter_angkatan'] ?? null;
         $filterKategori = $filters['filter_kategori'] ?? null;
         $keyword        = $filters['keyword'] ?? null;
+        $sort           = $filters['sort'] ?? null;
+        $order          = $filters['order'] ?? null;
+        
+        $allowedSort = ['nim', 'nama', 'prodi', 'jenjang', 'angkatan', 'kategori'];
+        $validOrder = ['asc', 'desc'];
 
         // Ambil info semester dari pencairan yang sedang aktif
         $pencairanModel = new \App\Models\PencairanModel();
@@ -149,6 +154,17 @@ class MahasiswaModel extends Model
             $builder->whereNotIn('mahasiswas.id', $excludedIds);
         }
 
+        // Sorting
+        if ($sort && in_array($sort, $allowedSort) && in_array($order, $validOrder)) {
+            if ($sort == 'prodi') {
+                $builder->orderBy('prodis.nama_prodi', $order);
+            } else {
+                $builder->orderBy('mahasiswas.' . $sort, $order);
+            }
+        } else {
+             $builder->orderBy('mahasiswas.id', 'DESC'); // Default matching other tables
+        }
+
         return $this->paginate($perPage, 'default');
     }
 
@@ -162,7 +178,13 @@ class MahasiswaModel extends Model
         $filterProdi    = $filters['filter_prodi'] ?? null;
         $filterAngkatan = $filters['filter_angkatan'] ?? null;
         $filterKategori = $filters['filter_kategori'] ?? null;
+        $filterKategori = $filters['filter_kategori'] ?? null;
         $entries        = $filters['entries'] ?? 10;
+        $sort           = $filters['sort'] ?? null;
+        $order          = $filters['order'] ?? null;
+
+        $allowedSort = ['nim', 'nama', 'prodi', 'jenjang', 'angkatan', 'kategori'];
+        $validOrder = ['asc', 'desc'];
 
         $builder = $this->select('mahasiswas.*, prodis.kode_prodi, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan')
             ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
@@ -188,14 +210,27 @@ class MahasiswaModel extends Model
                 ->groupEnd();
         }
 
+        // Sorting
+        if ($sort && in_array($sort, $allowedSort) && in_array($order, $validOrder)) {
+            if ($sort == 'prodi') {
+                $builder->orderBy('prodis.nama_prodi', $order);
+            } else {
+                $builder->orderBy('mahasiswas.' . $sort, $order);
+            }
+        } else {
+             $builder->orderBy('mahasiswas.nama', 'ASC'); // Default for list verification usually name
+        }
+
         return $builder->paginate($entries, 'default');
     }
 
     /**
      * Digunakan untuk halaman detail pencairan (lengkap dengan data PT)
      */
-    public function pencairan($id_pencairan, $keyword = null, $prodi = null, $angkatan = null, $entries = 10)
+    public function pencairan($id_pencairan, $keyword = null, $prodi = null, $angkatan = null, $entries = 10, $sort = null, $order = null)
     {
+        $allowedSort = ['nim', 'nama', 'prodi', 'jenjang', 'angkatan', 'kategori'];
+        $validOrder = ['asc', 'desc'];
         $this->select('mahasiswas.*, pts.perguruan_tinggi, pts.kode_pt, prodis.kode_prodi, prodis.nama_prodi, pengajuan_mahasiswa.status_pengajuan, pengajuan_mahasiswa.id as id_pengajuan')
             ->join('pengajuan_mahasiswa', 'pengajuan_mahasiswa.id_mahasiswa = mahasiswas.id')
             ->join('pts', 'pts.id = mahasiswas.id_pt')
@@ -216,6 +251,17 @@ class MahasiswaModel extends Model
 
         if (!empty($angkatan)) {
             $this->where('mahasiswas.angkatan', $angkatan);
+        }
+
+        // Sorting
+        if ($sort && in_array($sort, $allowedSort) && in_array($order, $validOrder)) {
+             if ($sort == 'prodi') {
+                $this->orderBy('prodis.nama_prodi', $order);
+            } else {
+                $this->orderBy('mahasiswas.' . $sort, $order);
+            }
+        } else {
+            $this->orderBy('mahasiswas.id', 'DESC');
         }
 
         // Tetap gunakan pagination sesuai preferensi Anda

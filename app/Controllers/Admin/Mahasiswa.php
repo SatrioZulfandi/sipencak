@@ -21,6 +21,10 @@ class Mahasiswa extends BaseController
         $keyword = $this->request->getGet('keyword');
         $filterProdi = $this->request->getGet('filter_prodi');
         $filterAngkatan = $this->request->getGet('filter_angkatan');
+        
+        // Ambil input sorting
+        $sort = $this->request->getGet('sort');
+        $order = $this->request->getGet('order');
 
         // Base Query
         $model->select('mahasiswas.*, prodis.nama_prodi')
@@ -42,6 +46,21 @@ class Mahasiswa extends BaseController
 
         if ($filterAngkatan) {
             $model->where('mahasiswas.angkatan', $filterAngkatan);
+        }
+        
+        // Sorting Logic
+        $allowedSort = ['nim', 'nama', 'prodi', 'jenjang', 'angkatan', 'kategori'];
+        $validOrder = ['asc', 'desc'];
+        
+        if (in_array($sort, $allowedSort) && in_array($order, $validOrder)) {
+            if ($sort == 'prodi') {
+                $model->orderBy('prodis.nama_prodi', $order);
+            } else {
+                $model->orderBy('mahasiswas.' . $sort, $order);
+            }
+        } else {
+            // Default sort
+            $model->orderBy('mahasiswas.id', 'DESC');
         }
 
         // Data for Dropdowns
@@ -74,7 +93,9 @@ class Mahasiswa extends BaseController
             'filter_angkatan' => $filterAngkatan,
             'list_prodi' => $listProdi,
             'list_angkatan' => $queryAngkatan,
-            'entries' => $entries // Kirim ke view
+            'entries' => $entries, // Kirim ke view
+            'sort' => $sort,
+            'order' => $order
         ];
 
         return view('admin/mahasiswa_list', $data);
