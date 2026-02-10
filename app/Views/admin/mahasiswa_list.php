@@ -407,18 +407,18 @@
 
     <div class="card card-elite mb-4 border-0 shadow-sm" style="background: #f8fafc; border-radius: 20px;">
         <div class="card-body p-4">
-             <form action="" method="get">
+            <form action="" method="get">
                 <div class="row g-3 align-items-center">
                     <!-- Filter Entries (Left) -->
                     <div class="col-12 col-md-auto">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="text-muted fw-bold small text-nowrap">Show</span>
-                            <select name="entries" class="form-select form-select-sm border-0 shadow-sm bg-white" style="width: auto; font-weight: 600;" onchange="this.form.submit()">
+                            <span class="text-muted small text-nowrap">Show</span>
+                            <select name="entries" class="form-select form-select-sm border-0 shadow-sm bg-white" style="width: auto; font-weight: 500; color: #64748b;" onchange="this.form.submit()">
                                 <?php foreach([10, 25, 50, 100] as $val): ?>
                                     <option value="<?= $val ?>" <?= (isset($entries) && $entries == $val) ? 'selected' : '' ?>><?= $val ?></option>
                                 <?php endforeach; ?>
                             </select>
-                            <span class="text-muted fw-bold small text-nowrap">entries</span>
+                            <span class="text-muted small text-nowrap">entries</span>
                         </div>
                     </div>
 
@@ -427,7 +427,7 @@
                         <div class="row g-3">
                             <!-- Filter Prodi -->
                             <div class="col-12 col-md-4">
-                                <select name="filter_prodi" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" onchange="this.form.submit()">
+                                <select name="filter_prodi" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" style="color: #64748b;" onchange="this.form.submit()">
                                     <option value="">Semua Prodi</option>
                                     <?php if (!empty($list_prodi)): ?>
                                         <?php foreach($list_prodi as $lp): ?>
@@ -441,7 +441,7 @@
 
                             <!-- Filter Angkatan -->
                             <div class="col-12 col-md-3">
-                                <select name="filter_angkatan" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" onchange="this.form.submit()">
+                                <select name="filter_angkatan" class="form-select form-select-sm border-0 shadow-sm bg-white w-100" style="color: #64748b;" onchange="this.form.submit()">
                                     <option value="">Semua Angkatan</option>
                                     <?php if (!empty($list_angkatan)): ?>
                                         <?php foreach($list_angkatan as $la): ?>
@@ -458,7 +458,7 @@
                                 <div class="search-container position-relative w-100">
                                     <input type="text" name="keyword" class="form-control form-control-sm border-0 shadow-sm ps-5 bg-white w-100"
                                         placeholder="Cari NIM / Nama..."
-                                        style="padding-left: 2.5rem !important;"
+                                        style="padding-left: 2.5rem !important; color: #64748b;"
                                         value="<?= esc($keyword ?? '') ?>">
                                     <i class="fas fa-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; z-index: 5;"></i>
 
