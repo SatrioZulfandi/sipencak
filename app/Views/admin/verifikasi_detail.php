@@ -539,14 +539,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success && data.riwayat.length > 0) {
                         let html = '';
                         data.riwayat.forEach(r => {
-                            const statusClass = r.status_pengajuan === 'Diajukan' ? 'bg-success text-white' : 'bg-warning text-dark';
+                            let statusClass = 'bg-warning text-dark';
+                            let statusLabel = r.status_pengajuan;
+
+                            if (r.status_pengajuan === 'Diajukan') {
+                                if (r.status_pencairan === 'Selesai') {
+                                    statusClass = 'bg-success text-white';
+                                    statusLabel = 'Disetujui';
+                                } else if (r.status_pencairan === 'Diproses') {
+                                    statusClass = 'bg-primary text-white'; // Atau bg-info
+                                    statusLabel = 'Diproses';
+                                } else if (r.status_pencairan === 'Ditolak') {
+                                    statusClass = 'bg-danger text-white';
+                                    statusLabel = 'Ditolak';
+                                } else {
+                                    // Default jika status pencairan lain (misal null/draft)
+                                    statusClass = 'bg-primary text-white';
+                                    statusLabel = 'Diajukan';
+                                }
+                            } else {
+                                // Jika status pengajuan bukan 'Diajukan' (misal: Proses Pengajuan, Belum Diajukan)
+                                statusClass = 'bg-warning text-dark';
+                                statusLabel = r.status_pengajuan;
+                            }
+
                             const tanggal = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'}) : '-';
                             html += `
                                 <tr>
                                     <td class="fw-bold">${r.semester || '-'}</td>
                                     <td>${r.periode || '-'}</td>
                                     <td>${r.tahun || '-'}</td>
-                                    <td class="text-center"><span class="badge ${statusClass} px-3 py-1" style="font-size: 0.7rem;">${r.status_pengajuan}</span></td>
+                                    <td class="text-center"><span class="badge ${statusClass} px-3 py-1" style="font-size: 0.7rem;">${statusLabel}</span></td>
                                     <td class="text-muted" style="font-size: 0.8rem;">${tanggal}</td>
                                 </tr>
                             `;
