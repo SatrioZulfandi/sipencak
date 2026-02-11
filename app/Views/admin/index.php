@@ -105,7 +105,7 @@
     .main-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 2rem; /* Updated spacing */
     }
 
     @media (min-width: 1200px) {
@@ -117,7 +117,7 @@
     .glass-panel {
         background: var(--surface);
         border-radius: var(--radius-lg);
-        padding: 1.5rem;
+        padding: 2rem; /* Updated padding */
         border: 1px solid #e2e8f0;
         box-shadow: var(--shadow-sm);
     }
@@ -512,60 +512,267 @@
     <div class="main-grid">
         <div class="glass-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h6 class="fw-800 mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i> Progress Laporan PT</h6>
-                <span class="badge bg-light text-dark rounded-pill border"><?= date('Y') ?></span>
-            </div>
-            <div class="row align-items-center">
-                <div class="col-md-5">
-                    <div class="chart-box">
-                        <canvas id="chartUserPT"></canvas>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                            <div class="h4 fw-800 mb-0"><?= round(($jumlah_userpt / 264) * 100) ?>%</div>
-                            <div class="text-muted" style="font-size: 0.65rem; font-weight: 700;">MELAPOR</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-7">
-                    <div class="bg-light p-3 rounded-4 mt-3 mt-md-0">
-                        <div class="small fw-800 text-muted mb-3 text-uppercase">Detail Verifikasi</div>
-                        <div class="d-flex justify-content-between small fw-700 mb-1">
-                            <span>PT Terverifikasi</span>
-                            <span><?= $jumlah_userpt ?> / 264</span>
-                        </div>
-                        <div class="progress mb-4" style="height: 8px; border-radius: 10px;">
-                            <div class="progress-bar bg-primary" style="width: <?= ($jumlah_userpt / 264) * 100 ?>%; border-radius: 10px;"></div>
-                        </div>
-                        <a href="<?= base_url('verifikasi-pembaharuan-status') ?>" class="btn btn-brand">Buka Portal Data</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-panel">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h6 class="fw-800 mb-0">
-                    <i class="fas fa-bullhorn me-2 text-warning"></i> Pengumuman
+                <h6 class="fw-800 mb-0 d-flex align-items-center gap-2">
+                    <i class="fas fa-tasks text-primary"></i> Action Center
                 </h6>
-                <a href="<?= base_url('papan-informasi') ?>" class="small text-decoration-none fw-bold" style="color: #2563eb;">
-                    Lihat Semua <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                <span class="badge bg-light text-muted rounded-pill border px-3 py-2">Butuh Tindakan</span>
+            </div>
+            
+            <div class="d-flex flex-column" style="gap: 2rem !important;">
+                
+                <!-- 1. Sedang Diproses (Solid Blue) -->
+                <a href="<?= base_url('verifikasi-pembaharuan-status?status=Diproses') ?>" class="action-card theme-blue text-decoration-none text-white">
+                    <div class="d-flex align-items-center justify-content-between w-100 position-relative z-1">
+                        <div class="d-flex align-items-center gap-5">
+                            <div class="action-icon-wrapper glass-icon">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <div>
+                                <div class="action-number"><?= number_format($jumlah_diproses) ?></div>
+                                <div class="action-label text-white-50">Sedang Diproses</div>
+                            </div>
+                        </div>
+                        <div class="btn btn-sm btn-glass rounded-pill px-4 fw-bold d-flex align-items-center gap-2">
+                            Lihat <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                    <!-- Decor Icon -->
+                    <i class="fas fa-hourglass-half bg-action-decor"></i>
+                </a>
+
+                <!-- 2. Perlu Revisi / Ditolak (Solid Orange) -->
+                <a href="<?= base_url('verifikasi-pembaharuan-status?status=Ditolak') ?>" class="action-card theme-orange text-decoration-none text-white">
+                    <div class="d-flex align-items-center justify-content-between w-100 position-relative z-1">
+                        <div class="d-flex align-items-center gap-5">
+                            <div class="action-icon-wrapper glass-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <div>
+                                <div class="action-number"><?= number_format($jumlah_ditolak) ?></div>
+                                <div class="action-label text-white-50">Dalam Perbaikan (Revisi)</div>
+                            </div>
+                        </div>
+                        <div class="btn btn-sm btn-glass rounded-pill px-4 fw-bold d-flex align-items-center gap-2">
+                            Cek <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                    <!-- Decor Icon -->
+                    <i class="fas fa-exclamation-triangle bg-action-decor"></i>
+                </a>
+
+                 <!-- 3. Monitoring Draft (Solid Slate) -->
+                 <a href="<?= base_url('admin/pencairan/draft') ?>" class="action-card theme-slate text-decoration-none text-white">
+                    <div class="d-flex align-items-center justify-content-between w-100 position-relative z-1">
+                        <div class="d-flex align-items-center gap-5">
+                            <div class="action-icon-wrapper glass-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <div class="action-number"><?= number_format($jumlah_draft) ?></div>
+                                <div class="action-label text-white-50">Draft PT (Belum Diajukan)</div>
+                            </div>
+                        </div>
+                        <div class="btn btn-sm btn-glass rounded-pill px-4 fw-bold d-flex align-items-center gap-2">
+                            Lihat <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                    <!-- Decor Icon -->
+                    <i class="fas fa-save bg-action-decor"></i>
                 </a>
             </div>
-            <div class="news-scroll">
-                <?php if (!empty($informasi)) : foreach (array_slice($informasi, 0, 4) as $info) : ?>
-                        <a href="<?= base_url('informasi-detail/' . $info['id']) ?>" class="news-tile">
-                            <div class="tile-date">
-                                <span><?= date('d', strtotime($info['tanggal'])) ?></span>
-                                <span style="font-size: 0.6rem;"><?= date('M', strtotime($info['tanggal'])) ?></span>
+
+            <style>
+                .action-card {
+                    display: flex;
+                    align-items: center;
+                    padding: 1.5rem;
+                    border-radius: 20px;
+                    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    border: none;
+                    text-decoration: none !important; /* Fix underline */
+                }
+
+                .action-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.2);
+                    text-decoration: none !important;
+                }
+                
+                .action-card * {
+                    text-decoration: none !important;
+                }
+                
+                .bg-action-decor {
+                    position: absolute;
+                    right: -10px;
+                    bottom: -20px;
+                    font-size: 8rem;
+                    opacity: 0.12;
+                    transform: rotate(-15deg);
+                    pointer-events: none;
+                    transition: transform 0.4s ease;
+                }
+
+                .action-card:hover .bg-action-decor {
+                    transform: rotate(0deg) scale(1.1);
+                }
+
+                .action-icon-wrapper {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    flex-shrink: 0;
+                    margin-right: 1.5rem; /* Add horizontal gap explicitly */
+                }
+
+                .glass-icon {
+                    background: rgba(255, 255, 255, 0.2);
+                    backdrop-filter: blur(4px);
+                    color: white;
+                }
+
+                .action-number {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    line-height: 1;
+                    margin-bottom: 0.25rem;
+                }
+
+                .action-label {
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                }
+
+                /* Glass Button */
+                .btn-glass {
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    backdrop-filter: blur(4px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                }
+                .action-card:hover .btn-glass {
+                    background: white;
+                    color: #334155;
+                }
+            </style>
+        </div>
+
+        <!-- Right Column (Pengumuman) -->
+        <div>
+            <div class="glass-panel h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-800 mb-0 d-flex align-items-center gap-2" style="margin-right: 15px !important;">
+                        <i class="fas fa-bullhorn text-warning"></i> Pengumuman
+                    </h6>
+                    <a href="<?= base_url('papan-informasi') ?>" class="text-decoration-none small fw-bold text-primary text-nowrap">
+                        Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    <?php if (empty($informasi)): ?>
+                        <div class="text-center py-5">
+                            <div class="mb-3 text-muted opacity-50">
+                                <i class="fas fa-clipboard-list fa-3x"></i>
                             </div>
-                            <div class="text-truncate">
-                                <div class="fw-700 text-truncate" style="font-size: 0.9rem;"><?= esc($info['judul']) ?></div>
-                                <div class="small text-muted fw-600">Unit Layanan KIP-K</div>
+                            <h6 class="fw-bold text-muted">Belum ada pengumuman</h6>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($informasi as $info): ?>
+                            <div class="announcement-card position-relative">
+                                <div class="d-flex align-items-center">
+                                    <!-- Date Box (Gradient Blue) -->
+                                    <div class="date-box flex-shrink-0 theme-blue text-white shadow-sm" style="margin-right: 20px !important;">
+                                        <div class="date-day"><?= date('d', strtotime($info['tanggal'])) ?></div>
+                                        <div class="date-month"><?= date('M', strtotime($info['tanggal'])) ?></div>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <h6 class="fw-bold text-dark mb-1 line-clamp-2" style="font-size: 0.95rem; line-height: 1.4;">
+                                            <?= esc($info['judul']) ?>
+                                        </h6>
+                                        <div class="text-muted small line-clamp-1 mb-2">
+                                            Unit Layanan KIP-K
+                                        </div>
+                                        <a href="<?= base_url('informasi-detail/' . $info['id']) ?>" class="stretched-link text-decoration-none small fw-bold text-primary opacity-0 link-hover">
+                                            Baca Selengkapnya
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </a>
-                    <?php endforeach;
-                else : ?>
-                    <div class="text-center py-4 text-muted small">Tidak ada info terbaru.</div>
-                <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <style>
+                    .announcement-card {
+                        padding: 1rem;
+                        background: #f8fafc;
+                        border-radius: 16px;
+                        transition: all 0.25s ease;
+                        border: 1px solid transparent;
+                    }
+
+                    .announcement-card:hover {
+                        background: white;
+                        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.08);
+                        transform: translateY(-2px);
+                        border-color: #e2e8f0;
+                    }
+
+                    .date-box {
+                        width: 50px;
+                        height: 54px;
+                        border-radius: 12px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        line-height: 1;
+                        /* background: linear-gradient set via theme-blue class */
+                    }
+
+                    .date-day {
+                        font-size: 1.1rem;
+                        font-weight: 800;
+                    }
+
+                    .date-month {
+                        font-size: 0.7rem;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        margin-top: 2px;
+                        opacity: 0.9;
+                    }
+
+                    .line-clamp-2 {
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+                    
+                    .line-clamp-1 {
+                        display: -webkit-box;
+                        -webkit-line-clamp: 1;
+                        line-clamp: 1;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .announcement-card:hover .link-hover {
+                        opacity: 1 !important;
+                    }
+                </style>
             </div>
         </div>
     </div>

@@ -28,12 +28,21 @@ class Home extends BaseController
         // Ambil 6 informasi terbaru (semua PT)
         $informasi = $informasiModel->orderBy('tanggal', 'DESC')->findAll(6);
 
+        // Statistik Action Center
+        // $jumlah_diajukan = $pencairanModel->where('status', 'diajukan')->countAllResults(); // Removed as per request
+        $jumlah_diproses = $pencairanModel->where('status', 'diproses')->countAllResults();
+        $jumlah_ditolak  = $pencairanModel->where('status', 'ditolak')->countAllResults(); // Replaces "Menunggu Verifikasi"
+        $jumlah_draft    = $pencairanModel->whereNotIn('status', ['Diproses', 'Selesai', 'Ditolak'])->countAllResults();
+
         $data = [
             'title'             => 'Admin PT - Dashboard',
             'jumlah_pt'         => $jumlah_pt,
             'jumlah_mahasiswa'  => $jumlah_mahasiswa,
             'jumlah_userpt'     => $jumlah_userpt,
             'jumlah_pencairan'  => $jumlah_pencairan,
+            'jumlah_diproses'   => $jumlah_diproses,
+            'jumlah_ditolak'    => $jumlah_ditolak,
+            'jumlah_draft'      => $jumlah_draft,
             'informasi'         => $informasi
         ];
 

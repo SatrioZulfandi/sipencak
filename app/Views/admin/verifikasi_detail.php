@@ -378,6 +378,14 @@
                 </button>
             </div>
         <?php endif; ?>
+
+        <?php if ($data['status'] === 'Ditolak'): ?>
+            <div class="d-flex">
+                <a href="<?= base_url('verifikasi-edit/' . $data['id']) ?>" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center">
+                    <i class="fas fa-pen mr-2"></i> Edit / Revisi
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="info-card-elite">

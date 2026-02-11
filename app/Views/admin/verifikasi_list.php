@@ -438,17 +438,26 @@
 
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-md-end">
-            <form action="" method="get" class="search-container">
-                <input type="text" name="keyword" class="search-input-elite"
-                    placeholder="Cari Periode, Kategori, atau Status..."
-                    value="<?= esc($keyword ?? '') ?>">
-                <i class="fas fa-search search-icon"></i>
+            <form action="" method="get" class="search-container d-flex gap-2" style="max-width: 550px;">
+                <select name="status" class="form-select border shadow-sm" style="width: auto; border-radius: 12px; font-size: 0.85rem; border-color: var(--border-color);" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="Diproses" <?= ($statusFilter ?? '') == 'Diproses' ? 'selected' : '' ?>>Diproses</option>
+                    <option value="Selesai" <?= ($statusFilter ?? '') == 'Selesai' ? 'selected' : '' ?>>Selesai</option>
+                    <option value="Ditolak" <?= ($statusFilter ?? '') == 'Ditolak' ? 'selected' : '' ?>>Ditolak</option>
+                </select>
 
-                <?php if (!empty($keyword)): ?>
-                    <a href="<?= base_url('verifikasi-pembaharuan-status') ?>" class="clear-search" title="Bersihkan">
-                        <i class="fas fa-times-circle"></i>
-                    </a>
-                <?php endif; ?>
+                <div class="position-relative flex-grow-1">
+                    <input type="text" name="keyword" class="search-input-elite"
+                        placeholder="Cari Periode / Kategori..."
+                        value="<?= esc($keyword ?? '') ?>">
+                    <i class="fas fa-search search-icon"></i>
+
+                    <?php if (!empty($keyword)): ?>
+                        <a href="<?= base_url('verifikasi-pembaharuan-status') ?>" class="clear-search" title="Bersihkan">
+                            <i class="fas fa-times-circle"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
             </form>
         </div>
     </div>
@@ -508,9 +517,16 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <a href="/verifikasi-detail/<?= $item['id'] ?>" class="btn btn-sm btn-light border py-2 px-3 text-primary d-flex align-items-center gap-2 justify-content-center" title="Detail">
-                                        <i class="fas fa-eye"></i> <span class="d-none d-md-inline">Detail</span>
-                                    </a>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <?php if ($item['status'] === 'Ditolak'): ?>
+                                            <a href="/verifikasi-edit/<?= $item['id'] ?>" class="btn btn-sm btn-warning border py-2 px-3 text-dark d-flex align-items-center gap-2 justify-content-center shadow-sm" title="Revisi">
+                                                <i class="fas fa-pen"></i> <span class="d-none d-md-inline">Revisi</span>
+                                            </a>
+                                        <?php endif; ?>
+                                        <a href="/verifikasi-detail/<?= $item['id'] ?>" class="btn btn-sm btn-light border py-2 px-3 text-primary d-flex align-items-center gap-2 justify-content-center shadow-sm" title="Detail">
+                                            <i class="fas fa-eye"></i> <span class="d-none d-md-inline">Detail</span>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

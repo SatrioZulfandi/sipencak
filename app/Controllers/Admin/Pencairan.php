@@ -22,12 +22,21 @@ class Pencairan extends BaseController
         $periodeModel = new PeriodeModel();
         $pt = session()->get('pt');
 
-        // Ambil keyword dari input GET
+        // Ambil filter dari input GET
         $keyword = $this->request->getGet('keyword');
+        $statusFilter = $this->request->getGet('status');
 
         // Query Dasar
-        $model->where('id_pt', $pt)
-            ->whereIn('status', ['Diproses', 'Selesai', 'Ditolak']);
+        $model->where('id_pt', $pt);
+        
+        // Filter Status logic
+        $allowedStatuses = ['Diproses', 'Selesai', 'Ditolak'];
+        
+        if ($statusFilter && in_array($statusFilter, $allowedStatuses)) {
+             $model->where('status', $statusFilter);
+        } else {
+             $model->whereIn('status', $allowedStatuses);
+        }
 
         // Logika Pencarian
         if ($keyword) {
@@ -44,7 +53,8 @@ class Pencairan extends BaseController
             'draft'   => $model->where('id_pt', $pt)->draft(),
             'title'   => 'Verifikasi Pembaharuan Status',
             'periode' => $periodeModel->periode(),
-            'keyword' => $keyword // Kirim balik ke view
+            'keyword' => $keyword,
+            'statusFilter' => $statusFilter // Kirim balik ke view
         ];
 
         return view('admin/verifikasi_list', $data);
