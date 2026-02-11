@@ -329,6 +329,28 @@
         background: #dbeafe;
         color: var(--primary);
     }
+    
+    /* --- STICKY COLUMN --- */
+    .sticky-col {
+        position: -webkit-sticky;
+        position: sticky;
+        right: 0;
+        z-index: 10;
+        background-color: #fff; /* Match row bg */
+        box-shadow: -4px 0 8px rgba(0,0,0,0.05); /* Left shadow */
+        border-left: 1px solid var(--border-color);
+    }
+
+    .table-elite thead th.sticky-col {
+        background-color: #f8fafc; /* Match header bg */
+        z-index: 20; /* Higher than tbody sticky */
+    }
+
+    /* Ensure hover effect works on sticky col */
+    .table-elite tbody tr:hover td.sticky-col {
+        background-color: #f1f5f9;
+        transition: background-color 0.2s ease;
+    }
 </style>
 
 <div class="container-fluid px-4 py-4 fade-in-up">
@@ -544,7 +566,7 @@
                         <th class="text-center"><?= $getSortLink('angkatan', 'Angkatan') ?></th>
                         <th><?= $getSortLink('kategori', 'Kategori') ?></th>
                         <th class="text-center"><?= $getSortLink('pembaruan_status', 'Status') ?></th>
-                        <th class="text-center" width="100">Aksi</th>
+                        <th class="text-center sticky-col" width="100">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -576,7 +598,7 @@
                                         <?= esc($m['pembaruan_status']) ?>
                                     </span>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center sticky-col">
                                     <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-bold btn-riwayat" 
                                             data-id="<?= $m['id'] ?>" data-nim="<?= esc($m['nim']) ?>" data-nama="<?= esc($m['nama']) ?>"
                                             style="font-size: 0.7rem;">

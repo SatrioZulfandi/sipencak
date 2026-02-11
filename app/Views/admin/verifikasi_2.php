@@ -309,6 +309,33 @@
         color: #991b1b !important; /* Red text */
         border-color: #fecaca !important;
     }
+    .select-status-henti {
+        background-color: #fee2e2 !important; /* Red bg */
+        color: #991b1b !important; /* Red text */
+        border-color: #fecaca !important;
+    }
+
+    /* --- STICKY COLUMN --- */
+    .sticky-col {
+        position: -webkit-sticky;
+        position: sticky;
+        right: 0;
+        z-index: 10;
+        background-color: #fff; /* Match row bg */
+        box-shadow: -4px 0 8px rgba(0,0,0,0.05); /* Left shadow */
+        border-left: 1px solid var(--border-color);
+    }
+
+    .table-elite thead th.sticky-col {
+        background-color: #f8fafc; /* Match header bg */
+        z-index: 20; /* Higher than tbody sticky */
+    }
+
+    /* Ensure hover effect works on sticky col */
+    .table-elite tbody tr:hover td.sticky-col {
+        background-color: #f1f5f9;
+        transition: background-color 0.2s ease;
+    }
 </style>
 
 <div class="container-fluid px-4 py-4 fade-in-up">
@@ -501,7 +528,7 @@
                         <th><?= $getSortLink('jenjang', 'Jenjang') ?></th>
                         <th class="text-center"><?= $getSortLink('angkatan', 'Angkatan') ?></th>
                         <th><?= $getSortLink('kategori', 'Kategori') ?></th>
-                        <th width="120">Pembaruan</th>
+                        <th width="120" class="sticky-col">Pembaruan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -523,7 +550,7 @@
                                 <td><?= esc($mhs['jenjang']) ?></td>
                                 <td class="text-center"><?= esc($mhs['angkatan']) ?></td>
                                 <td><small class="fw-medium"><?= esc($mhs['kategori']) ?></small></td>
-                                <td>
+                                <td class="sticky-col">
                                     <?php
                                         // Tentukan kelas warna awal
                                         $statusClass = ($mhs['pembaruan_status'] == 'Henti') ? 'select-status-henti' : 'select-status-tetap';
