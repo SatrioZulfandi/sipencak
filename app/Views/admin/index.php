@@ -67,8 +67,8 @@
 
     @media (min-width: 992px) {
         .stats-container {
-            grid-template-columns: repeat(4, 1fr);
-            /* 4 Kolom di PC */
+            grid-template-columns: repeat(3, 1fr);
+            /* 3 Kolom di PC */
             gap: 1.5rem;
         }
     }
@@ -313,10 +313,185 @@
         </div>
     </div>
 
+    <!-- --- QUICK ACCESS MENU --- -->
+    <style>
+        .quick-access-card {
+            border-radius: 24px;
+            padding: 2rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-decoration: none !important;
+            color: white !important;
+            height: 100%;
+            min-height: 220px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .quick-access-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.25);
+            text-decoration: none !important;
+        }
+
+        .quick-icon-large {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .quick-title-large {
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .quick-subtitle {
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bg-icon-decor {
+            position: absolute;
+            right: -25px;
+            bottom: -35px;
+            font-size: 10rem;
+            opacity: 0.12;
+            transform: rotate(-15deg);
+            pointer-events: none;
+            transition: transform 0.4s ease;
+        }
+
+        .quick-access-card:hover .bg-icon-decor {
+            transform: rotate(0deg) scale(1.1);
+        }
+
+        /* --- THEMES --- */
+        .theme-blue {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        }
+        
+        .theme-orange {
+            background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+        }
+        
+        .theme-green {
+            background: linear-gradient(135deg, #047857 0%, #10b981 100%);
+        }
+        
+        .theme-slate {
+            background: linear-gradient(135deg, #334155 0%, #64748b 100%);
+        }
+
+        /* Header Style */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+
+    <div class="mb-5 px-1">
+        <div class="section-header">
+            <i class="fas fa-th-large text-primary"></i> 
+            Menu Akses Cepat
+        </div>
+
+        <div class="row g-4">
+            <!-- 1. Verifikasi Status (Blue) -->
+            <div class="col-md-6 col-xl-3">
+                <a href="<?= base_url('verifikasi-pembaharuan-status') ?>" class="quick-access-card theme-blue">
+                    <div class="quick-icon-large">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="quick-title-large">Verifikasi Data<br>Mahasiswa</div>
+                        <div class="quick-subtitle">
+                            <i class="fas fa-search"></i> Cek Status & Validasi
+                        </div>
+                    </div>
+                    <i class="fas fa-rocket bg-icon-decor"></i>
+                </a>
+            </div>
+
+            <!-- 2. Laporan Pencairan (Orange) -->
+            <div class="col-md-6 col-xl-3">
+                <a href="<?= base_url('laporan/pencairan') ?>" class="quick-access-card theme-orange">
+                    <div class="quick-icon-large">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <div class="quick-title-large">Laporan<br>Pencairan</div>
+                        <div class="quick-subtitle">
+                            <i class="fas fa-chart-bar"></i> Rekapitulasi Dana
+                        </div>
+                    </div>
+                    <i class="fas fa-file-alt bg-icon-decor"></i>
+                </a>
+            </div>
+
+            <!-- 3. Manajemen Mahasiswa (Green) -->
+            <div class="col-md-6 col-xl-3">
+                <a href="<?= base_url('mahasiswa') ?>" class="quick-access-card theme-green">
+                    <div class="quick-icon-large">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="quick-title-large">Database<br>Mahasiswa</div>
+                        <div class="quick-subtitle">
+                            <i class="fas fa-database"></i> Master Data Utama
+                        </div>
+                    </div>
+                    <i class="fas fa-user-graduate bg-icon-decor" style="right: -40px;"></i>
+                </a>
+            </div>
+
+            <!-- 4. Log Aktivitas (Slate) -->
+            <div class="col-md-6 col-xl-3">
+                <a href="<?= base_url('log-aktivitas') ?>" class="quick-access-card theme-slate">
+                    <div class="quick-icon-large">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <div class="quick-title-large">Riwayat<br>Aktivitas</div>
+                        <div class="quick-subtitle">
+                            <i class="fas fa-clock"></i> Log Sistem Admin
+                        </div>
+                    </div>
+                    <i class="fas fa-clipboard-list bg-icon-decor"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="stats-container">
         <?php
         $items = [
-            ['Ttl. PT', $jumlah_pt, 'fa-university', '#dbeafe', '#2563eb'],
             ['Mhs.', $jumlah_mahasiswa, 'fa-user-graduate', '#dcfce7', '#10b981'],
             ['Verifikator', $jumlah_userpt, 'fa-user-check', '#ecfeff', '#0891b2'],
             ['Pencairan', $jumlah_pencairan, 'fa-wallet', '#fef3c7', '#d97706'],
