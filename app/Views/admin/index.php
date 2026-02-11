@@ -441,7 +441,7 @@
 
             <!-- 2. Laporan Pencairan (Orange) -->
             <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('laporan/pencairan') ?>" class="quick-access-card theme-orange">
+                <a href="<?= base_url('admin/laporan') ?>" class="quick-access-card theme-orange">
                     <div class="quick-icon-large">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
@@ -457,7 +457,7 @@
 
             <!-- 3. Manajemen Mahasiswa (Green) -->
             <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('mahasiswa') ?>" class="quick-access-card theme-green">
+                <a href="<?= base_url('mahasiswa-list') ?>" class="quick-access-card theme-green">
                     <div class="quick-icon-large">
                         <i class="fas fa-users"></i>
                     </div>
@@ -473,7 +473,7 @@
 
             <!-- 4. Log Aktivitas (Slate) -->
             <div class="col-md-6 col-xl-3">
-                <a href="<?= base_url('log-aktivitas') ?>" class="quick-access-card theme-slate">
+                <a href="<?= base_url('activity-logs') ?>" class="quick-access-card theme-slate">
                     <div class="quick-icon-large">
                         <i class="fas fa-history"></i>
                     </div>
