@@ -303,11 +303,18 @@
     <script>
         $(document).ready(function() {
             // Sidebar Toggle Logic
+
             $('#sidebarToggle').on('click', function(e) {
                 e.preventDefault();
                 $('#wrapper').toggleClass('toggled');
-                $('#sidebar').toggleClass('minimized');
-                if ($(window).width() < 992) $('#sidebar').toggleClass('active');
+                
+                // Logic Perbaikan: Mobile jangan di-minimize agar teks tetap terbaca
+                if ($(window).width() < 992) {
+                    $('#sidebar').toggleClass('active');
+                    $('#sidebar').removeClass('minimized');
+                } else {
+                    $('#sidebar').toggleClass('minimized');
+                }
             });
 
             // ADVANCED DROPDOWN LOCK

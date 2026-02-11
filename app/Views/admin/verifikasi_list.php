@@ -379,6 +379,13 @@
 </style>
 
 <div class="container-fluid px-4 py-5 fade-in-up">
+    <div class="d-flex align-items-center mb-4">
+        <h6 class="text-uppercase fw-bold text-muted small mb-0" style="letter-spacing: 1px;">
+            <i class="fas fa-th-large me-2 text-primary"></i> Menu Akses Cepat
+        </h6>
+        <div class="flex-grow-1 ms-3 border-bottom" style="border-color: rgba(0,0,0,0.1) !important;"></div>
+    </div>
+
     <div class="row g-4 mb-5">
         <div class="col-md-6">
             <a href="/permohonan-pencairan" class="card-action-rel action-primary-new">

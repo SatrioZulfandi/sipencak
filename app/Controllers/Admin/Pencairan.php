@@ -413,17 +413,31 @@ class Pencairan extends BaseController
             ->whereIn('status', ['Ajukan Mahasiswa', 'Finalisasi'])
             ->delete();
 
+        // Ambil Keyword Pencarian
+        $keyword = $this->request->getGet('keyword');
+
+        // Base Query
+        $pencairanModel->where('id_pt', $pt)
+            ->where('status !=', 'Selesai')
+            ->where('status !=', 'Diproses');
+
+        // Logika Pencarian
+        if ($keyword) {
+            $pencairanModel->groupStart()
+                ->like('kategori_penerima', $keyword)
+                ->orLike('semester', $keyword)
+                ->orLike('status', $keyword)
+                ->orLike('tanggal_entry', $keyword)
+                ->groupEnd();
+        }
+
         $data = [
             'title' => 'Draft Permohonan Pencairan',
-            // Menggunakan paginate(10) untuk limit 10 data per halaman
             'draft' => $pencairanModel
-                ->where('id_pt', $pt)
-                ->where('status !=', 'Selesai')  // Saring agar 'Selesai' tidak muncul
-                ->where('status !=', 'Diproses') // Saring agar 'Diproses' juga tidak muncul
                 ->orderBy('id', 'DESC')
                 ->paginate(10, 'default'),
             'pager' => $pencairanModel->pager,
-            // Hitung jumlah draft kosong untuk tombol
+            'keyword' => $keyword, // Kirim ke view
             'emptyDraftCount' => $pencairanModel
                 ->where('id_pt', $pt)
                 ->where('jumlah_mahasiswa', 0)
