@@ -503,7 +503,7 @@
                                         </span>
                                     <?php else: ?>
                                         <span class="badge-status-elite badge-diproses">
-                                            <i class="fas fa-sync fa-spin small"></i> <?= $item['status'] ?>
+                                            <i class="fas fa-circle-notch fa-spin"></i> <?= $item['status'] ?>
                                         </span>
                                     <?php endif; ?>
                                 </td>

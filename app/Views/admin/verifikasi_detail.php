@@ -148,6 +148,12 @@
         border: 1px solid #fee2e2;
     }
 
+    .badge-elite-warning {
+        background: #fef9c3;
+        color: #854d0e;
+        border: 1px solid #fde047;
+    }
+
     .btn-file-elite {
         display: flex;
         align-items: center;
@@ -402,6 +408,10 @@
                     <?php elseif ($data['status'] === 'Ditolak'): ?>
                         <div class="badge-elite badge-elite-danger" data-toggle="modal" data-target="#modalTolak" style="cursor: pointer;">
                             <i class="fas fa-times-circle"></i> Ditolak <i class="fas fa-info-circle opacity-50"></i>
+                        </div>
+                    <?php elseif ($data['status'] === 'Diproses'): ?>
+                        <div class="badge-elite badge-elite-warning">
+                            <i class="fas fa-circle-notch fa-spin"></i> Diproses
                         </div>
                     <?php else: ?>
                         <span class="badge bg-light text-dark border fw-bold px-3 py-2 rounded-3"><?= esc($data['status']) ?></span>

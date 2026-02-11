@@ -63,6 +63,8 @@
         border-radius: 12px;
         border: 1px solid var(--border);
         margin-bottom: 1.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .table-elite {

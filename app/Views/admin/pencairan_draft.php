@@ -303,15 +303,7 @@
         </a>
     </div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show mb-4 rounded-4 border-0 shadow-sm" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-check-circle me-2 fs-5"></i>
-                <div><?= session()->getFlashdata('success') ?></div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+
 
     <!-- Main Table Card -->
     <div class="card card-elite">
@@ -361,7 +353,6 @@
                                 <td class="fw-semibold">
                                     <div class="d-flex flex-column">
                                         <span><?= date('d M Y', strtotime($item['tanggal_entry'])) ?></span>
-                                        <small class="text-muted"><?= date('H:i', strtotime($item['tanggal_entry'])) ?> WIB</small>
                                     </div>
                                 </td>
                                 <td>
