@@ -287,27 +287,131 @@
     .clear-search:hover {
         color: var(--danger);
     }
+
+    /* --- NEW ACTION CARDS 2026 --- */
+    .card-action-rel {
+        display: block;
+        padding: 2rem;
+        border-radius: 20px;
+        text-decoration: none !important;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-action-rel:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+        text-decoration: none !important;
+    }
+
+    .action-primary-new {
+        background: linear-gradient(135deg, #2563eb 0%, #172554 100%);
+        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    }
+
+    .action-warning-new {
+        background: linear-gradient(135deg, #f59e0b 0%, #78350f 100%);
+        box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);
+    }
+
+    .action-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .action-title {
+        color: white;
+        font-weight: 800;
+        font-size: 1.35rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .action-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .action-icon-bg {
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        font-size: 6rem;
+        opacity: 0.15;
+        transform: rotate(-15deg);
+        transition: all 0.4s ease;
+        z-index: 1;
+        color: white;
+    }
+
+    .card-action-rel:hover .action-icon-bg {
+        transform: rotate(0deg) scale(1.1);
+        opacity: 0.25;
+        right: 10px;
+        bottom: -10px;
+    }
+
+    .action-arrow {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-bottom: 1rem;
+        transition: 0.3s;
+    }
+
+    .card-action-rel:hover .action-arrow {
+        background: white;
+        color: var(--primary);
+    }
+
+    .action-warning-new:hover .action-arrow {
+        color: #d97706;
+    }
 </style>
 
 <div class="container-fluid px-4 py-5 fade-in-up">
-    <div class="row g-3 mb-5">
+    <div class="row g-4 mb-5">
         <div class="col-md-6">
-            <a href="/permohonan-pencairan" class="btn-elite btn-primary-elite w-100 flex-column py-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-play-circle fa-lg"></i>
-                    <span class="fs-6">Mulai Proses Pencairan</span>
+            <a href="/permohonan-pencairan" class="card-action-rel action-primary-new">
+                <div class="action-content">
+                    <div class="action-arrow">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="action-title">Mulai Proses Pencairan</div>
+                    <div class="action-subtitle">
+                        <i class="far fa-calendar-check me-1"></i> Periode aktif: <?= $periode['periode'] ?>
+                    </div>
                 </div>
-                <div class="small opacity-75 mt-1">Periode aktif: <?= $periode['periode'] ?></div>
+                <div class="action-icon-bg">
+                    <i class="fas fa-rocket"></i>
+                </div>
             </a>
         </div>
+        
         <?php if (session()->get('role') === 'admin'): ?>
             <div class="col-md-6">
-                <a href="/admin/pencairan/draft" class="btn-elite btn-yellow-elite w-100 flex-column py-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fas fa-file-invoice fa-lg"></i>
-                        <span class="fs-6">Lihat Semua Draft</span>
+                <a href="/admin/pencairan/draft" class="card-action-rel action-warning-new">
+                    <div class="action-content">
+                        <div class="action-arrow">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="action-title">Lihat Semua Draft</div>
+                        <div class="action-subtitle">
+                            <i class="fas fa-layer-group me-1"></i> Sistem Antrean Draft
+                        </div>
                     </div>
-                    <div class="small opacity-75 mt-1">Sistem Antrean Draft</div>
+                    <div class="action-icon-bg">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
                 </a>
             </div>
         <?php endif; ?>
